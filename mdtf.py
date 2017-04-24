@@ -115,7 +115,7 @@ if os.environ["model"] == "GFDL_onset_diag" :
    os.environ["time_var"] = "time"
    os.environ["level_var"] = "level"
    os.environ["PRECT_var"] = "pr"   
-   os.environ["3D_T_var"] = "ta" # if 3D temperature exists
+   os.environ["T_3D_var"] = "ta" # if 3D temperature exists
    os.environ["PS_var"] = "PS"
    os.environ["CWV_var"] = "PRW" # precipitable water
    # once pre-processed variables are done:
