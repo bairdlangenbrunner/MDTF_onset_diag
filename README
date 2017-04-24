@@ -1,0 +1,14 @@
+
+Python 2.7.5 can be used for the package and NCL is required to run the package.
+
+To run the package, execute the python script "mdft.py" in which case name, file path, variable names, etc are set.
+
+To add your diagnostics to the package, put the script under the directory of "var_code" and have mdft.py call that script. Users' script should convert the plots into png or gif and modify the html file "variab.html" so the web page will provide links to the diagnostics. Please refer to the example of var_code/eof_plots.py.
+
+Under the specified work directory, there will be a directory called "MDTF_{casename}". Under that directory, users will find a directory of your case and "obs" directory. The plots of the model simulation should go to the case directory and the plots of observation should go into the "obs" directory. 
+
+After running the package, the results will be copied over to the "WEBDIR" directory. 
+
+In this template, a sample model simulation is provided (ACCRI_2006_control).
+The web page will look like:
+http://www.cgd.ucar.edu/cms/cchen/MDTF_ACCRI_2006_control/variab.html
