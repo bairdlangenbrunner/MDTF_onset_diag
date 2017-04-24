@@ -20,7 +20,7 @@ MODEL_FILENAME_PREFIX="atmos."
 #### Variable Names #### (taken from mdtf.py file)
 PR_VAR=os.environ["PRECT_var"]
 PRW_VAR=os.environ["CWV_var"]
-TA_VAR=os.environ["3D_T_var"]
+TA_VAR=os.environ["T_3D_var"]
 PRES_VAR=os.environ["level_var"]
 
 ## Region mask directory & filename
