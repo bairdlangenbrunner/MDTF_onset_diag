@@ -13,15 +13,15 @@ import json
 
 print "LOADING USER SPECIFIED BINNING PARAMETERS"
 ### Create and read user specified parameters ###
-os.system("python "+os.environ["VARCODE"]+"/user_specified_binning_parameters.py")
+os.system("python "+os.environ["VARCODE"]+"/"+"user_specified_binning_parameters.py")
 
-with open(os.environ["VARCODE"]+"/bin_parameters.json") as outfile:
+with open(os.environ["VARCODE"]+"/"+"bin_parameters.json") as outfile:
     bin_data=json.load(outfile)
 
 print "LOADING USER SPECIFIED PLOTTING PARAMETERS"
-os.system("python "+os.environ["VARCODE"]+"/user_specified_plotting_parameters.py")
+os.system("python "+os.environ["VARCODE"]+"/"+"user_specified_plotting_parameters.py")
 
-with open(os.environ["VARCODE"]+"/plot_parameters.json") as outfile:
+with open(os.environ["VARCODE"]+"/"+"plot_parameters.json") as outfile:
     plot_data=json.load(outfile)
 
 ##########

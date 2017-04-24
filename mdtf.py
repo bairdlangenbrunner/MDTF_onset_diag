@@ -10,7 +10,6 @@ import os
 import subprocess
 
 # ======================================================================
-# Hi
 # If using NCL, need to point to it 
 #set NCARG_ROOT
 
@@ -106,7 +105,7 @@ if os.environ["model"] == 'CESM' :
    os.environ["file_Z3"] = os.environ["CASENAME"]+"."+os.environ["Z3_var"]+".nc"
    os.environ["file_PS"] = os.environ["CASENAME"]+"."+os.environ["PS_var"]+".nc"
 
-if os.environ["model"] == "GFDL_conv_diag" :
+if os.environ["model"] == "GFDL_onset_diag" :
    os.environ["lat_coord"] = "lat"
    os.environ["lon_coord"] = "lon"   
    os.environ["lev_coord"] = "level" # must be on pressure levels (hPa)

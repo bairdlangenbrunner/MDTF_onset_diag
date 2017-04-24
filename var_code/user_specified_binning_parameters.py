@@ -14,7 +14,7 @@ data={}
 ### Model output directory & filename ###
 MODEL="AM4-2P"
 MODEL_OUTPUT_DIR="/ninad/baird/c96L48_am4b6_DDFull_MDTF/"
-PREPROCESSING_OUTPUT_DIR="/home/baird/MDTF_conv_diag/" # USER MUST HAVE WRITE PERMISSION HERE
+PREPROCESSING_OUTPUT_DIR="/ninad/baird/c96L48_am4b6_DDFull_MDTF/" # USER MUST HAVE WRITE PERMISSION HERE
 MODEL_FILENAME_PREFIX="atmos."
 
 #### Variable Names #### (taken from mdtf.py file)
@@ -39,11 +39,11 @@ REGION_STR=["WPac","EPac","Atl","Ind"]
 TAVE_QSAT_OUTPUT_DIR = PREPROCESSING_OUTPUT_DIR #MODEL_OUTPUT_DIR
 TAVE_VAR=os.environ["TAVE_var"]
 QSAT_VAR=os.environ["QSAT_AVE_var"]
-PRES_VAR=os.environ["level_var"] # bgl change
+PRES_VAR=os.environ["level_var"]
 
 ##### Give latitude and longitude names in file ####
 LAT_VAR=os.environ["lat_var"]
-LON_VAR=os.environ["lon_var"] # bgl change
+LON_VAR=os.environ["lon_var"]
 
 ## Use 1:tave, or 2:qsat as Bulk Tropospheric Temperature Measure 
 BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=1
@@ -52,8 +52,8 @@ BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=1
 BIN_OUTPUT_FILENAME="onset_diag_output_"+MODEL
     
 ## Re-do binning even if binning output detected (default: False)
-BIN_ANYWAY=False # bgl change
-    
+BIN_ANYWAY=False
+
 ## Column Water Vapor (CWV in mm) range & bin-width
 # CWV bin centers are integral multiples of cwv_bin_width
 CWV_BIN_WIDTH=0.3 # default=0.3 (following satellite retrieval product)
@@ -91,7 +91,6 @@ PRECIP_THRESHOLD=0.25
 
 ############# DO NOT MODIFY CODE BELOW UNLESS ########## 
 ############# YOU KNOW WHAT YOU ARE DOING ##########
-
 
 data["MODEL"]=MODEL
 data["MODEL_OUTPUT_DIR"]=MODEL_OUTPUT_DIR
@@ -226,9 +225,13 @@ PRECIP_THRESHOLD, \
 data["BIN_OUTPUT_DIR"], \
 data["BIN_OUTPUT_FILENAME"], \
 LAT_VAR, \
-LON_VAR]
+LON_VAR ]
 
-data["args2"]=[data["bin_output_list"],TAVE_VAR,QSAT_VAR,BULK_TROPOSPHERIC_TEMPERATURE_MEASURE]
+data["args2"]=[ \
+data["bin_output_list"],\
+TAVE_VAR,\
+QSAT_VAR,\
+BULK_TROPOSPHERIC_TEMPERATURE_MEASURE ]
 
 with open(os.environ["VARCODE"]+"/bin_parameters.json", "w") as outfile:
     json.dump(data, outfile)
