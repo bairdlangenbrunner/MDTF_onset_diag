@@ -166,22 +166,22 @@ data["time_idx_delta"]=time_idx_delta
 
 ## Threshold value defining precipitating events [mm/hr]
 data["PRECIP_THRESHOLD"]=PRECIP_THRESHOLD
-data["bin_output_list"]=glob.glob(data["BIN_OUTPUT_DIR"]+"/"+data["BIN_OUTPUT_FILENAME"]+".nc")
+data["bin_output_list"]=sorted(glob.glob(data["BIN_OUTPUT_DIR"]+"/"+data["BIN_OUTPUT_FILENAME"]+".nc"))
 
 ## List available netCDF files
 # Assumes that the corresponding files in each list
 #  have the same spatial/temporal coverage/resolution
-pr_list=glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PR_VAR+".nc")
-prw_list=glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PRW_VAR+".nc")
-ta_list=glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TA_VAR+".nc")
+pr_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PR_VAR+".nc"))
+prw_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PRW_VAR+".nc"))
+ta_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TA_VAR+".nc"))
 
 data["pr_list"] = pr_list
 data["prw_list"] = prw_list
 data["ta_list"] = ta_list
 
 ## Check for pre-processed TAVE & QSAT data
-data["tave_list"]=glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TAVE_VAR+".nc")
-data["qsat_list"]=glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+QSAT_VAR+".nc")
+data["tave_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TAVE_VAR+".nc"))
+data["qsat_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+QSAT_VAR+".nc"))
 
 if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1 and len(data["tave_list"])==0) \
     or (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2 and len(data["qsat_list"])==0):
