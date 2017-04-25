@@ -54,7 +54,8 @@ os.environ["WKDIR"] = os.getcwd()+"/wkdir/"+os.environ["CASENAME"]
 # ======================================================================
 # INPUT: directory of model output
 
-os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
+#os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
+os.environ["DATADIR"] = "/ninad/baird/"+os.environ["CASENAME"]
 
 # ======================================================================
 #OUTPUT

@@ -8,6 +8,11 @@ from netCDF4 import Dataset
 import matplotlib.pyplot as mp
 import matplotlib.cm as cm
 
+# ======================================================================
+# binning_tave function
+# takes arguments and bins vertically-integrated temperature field
+# by column water vapor bins
+
 @jit(nopython=True)
 def binning_tave(lon_idx, CWV_BIN_WIDTH, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PRECIP_THRESHOLD, REGION, CWV, RAIN, temp, QSAT, p0, p1, p2, pe, q0, q1):
     for lat_idx in numpy.arange(CWV.shape[1]):
@@ -28,8 +33,13 @@ def binning_tave(lon_idx, CWV_BIN_WIDTH, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUM
                         q0[reg-1,temp_idx[time_idx]]+=1
                         q1[reg-1,temp_idx[time_idx]]+=qsat[time_idx]
 
+# ======================================================================
+# binning_qsat_ave function
+# takes arguments and bins vertically-integrated qsat (saturation specific humidity)
+# by column water vapor bins
+
 @jit(nopython=True)
-def binning_qsat(lon_idx, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PRECIP_THRESHOLD, REGION, CWV, RAIN, temp, p0, p1, p2, pe):
+def binning_qsat_ave(lon_idx, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PRECIP_THRESHOLD, REGION, CWV, RAIN, temp, p0, p1, p2, pe):
     for lat_idx in numpy.arange(CWV.shape[1]):
         reg=REGION[lon_idx,lat_idx]
         if (reg>0 and reg<=NUMBER_OF_REGIONS):
@@ -43,6 +53,13 @@ def binning_qsat(lon_idx, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PR
                     p2[reg-1,cwv_idx[time_idx],temp_idx[time_idx]]+=rain[time_idx]**2
                     if (rain[time_idx]>PRECIP_THRESHOLD):
                         pe[reg-1,cwv_idx[time_idx],temp_idx[time_idx]]+=1
+
+# ======================================================================
+# generates a map of integer values that correspond to regions using
+# the file region_0.25x0.25_GOP2.5deg.mat in the var_data
+# currently, there are 4 regions corresponding to ocean-only grid points
+# in the Western Pacific (WPac), Eastern Pacific (EPac),
+# Atlantic (Atl), and Indian (Ind) Ocean basins
 
 def generate_region_mask(region_mask_filename, model_netcdf_filename):
     ## Load & Pre-process Region Mask
@@ -86,9 +103,16 @@ def generate_region_mask(region_mask_filename, model_netcdf_filename):
 
     return REGION, lat, lon
 
-def calc_save_tave_qsat(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
+# ======================================================================
+# function that takes in 3D temperature and qsat (saturation specific humidity)
+# fields and calculates their vertical average (tave and qsat_ave).
+#
+# these calculations will be broken up into chunks of time corresponding to
+# time_idx_delta with a default of 1000 time steps
+
+def calc_save_tave_qsat_ave(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
                         p_lev_bottom,p_lev_top,dp,time_idx_delta,\
-                        SAVE_TAVE_QSAT,TAVE_VAR,QSAT_VAR):
+                        SAVE_TAVE_QSAT,TAVE_VAR,QSAT_AVE_VAR):
     ## Constants for calculating saturation vapor pressure
     Tk0 = 273.15 # Reference temperature.
     Es0 = 610.7 # Vapor pressure [Pa] at Tk0.
@@ -241,7 +265,7 @@ def calc_save_tave_qsat(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
         print(ta_netcdf_filename.replace(TA_VAR,TAVE_VAR)+" saved!")
 
         # Save 1000-200mb Column-integrated Saturation Specific Humidity as qsat
-        qsat_output_netcdf=Dataset(ta_netcdf_filename.replace(TA_VAR,QSAT_VAR),"w",format="NETCDF4")
+        qsat_output_netcdf=Dataset(ta_netcdf_filename.replace(TA_VAR,QSAT_AVE_VAR),"w",format="NETCDF4")
         qsat_output_description=str(p_lev_bottom)+"-"+str(p_lev_top)+" hPa "\
                                     +"Column-integrated Saturation Specific Humidity for "+MODEL
         qsat_output_netcdf.source="Convective Onset Statistics Diagnostic Package \
@@ -268,16 +292,19 @@ def calc_save_tave_qsat(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
 
         qsat_output_netcdf.close()
 
-        print(ta_netcdf_filename.replace(TA_VAR,QSAT_VAR)+" saved!")
+        print(ta_netcdf_filename.replace(TA_VAR,QSAT_AVE_VAR)+" saved!")
 
         ta_netcdf.close()
     # End-if SAVE_TAVE_QSAT==1
 
     return tave, qsat
-###################################################################################################
-###################################################################################################
-###################################################################################################
-    
+
+# ======================================================================
+# this function takes in ALL 2D pre-processed fields
+# (precip., column water vapor, and EITHER tave or qsat_ave),
+# calculates the binned data, and save it as a netCDF file
+# in the var_data directory
+
 def preprocess_binning_saving(REGION,*argsv):
     ## ALLOCATE VARIABLES FOR EACH ARGUMENT ##
     
@@ -297,7 +324,7 @@ def preprocess_binning_saving(REGION,*argsv):
     PRW_VAR, \
     PREPROCESS_TA, \
     qsat_list, \
-    QSAT_VAR, \
+    QSAT_AVE_VAR, \
     tave_list, \
     TAVE_VAR, \
     ta_list, \
@@ -364,7 +391,7 @@ def preprocess_binning_saving(REGION,*argsv):
         if PREPROCESS_TA==0:
             qsat_netcdf=Dataset(qsat_list[li],"r")
             lat=numpy.asarray(qsat_netcdf.variables[LAT_VAR][:],dtype="float")
-            qsat=numpy.asarray(qsat_netcdf.variables[QSAT_VAR][:,:,:],dtype="float")
+            qsat=numpy.asarray(qsat_netcdf.variables[QSAT_AVE_VAR][:,:,:],dtype="float")
             qsat_netcdf.close()
             qsat=qsat[:,numpy.logical_and(lat>=-20.0,lat<=20.0),:]
             
@@ -380,9 +407,9 @@ def preprocess_binning_saving(REGION,*argsv):
                 print(tave_list[li]+" LOADED")
                 
         else: # PREPROCESS_TA=1
-            tave,qsat=calc_save_tave_qsat(ta_list[li],TA_VAR,PRES_VAR,MODEL,\
+            tave,qsat=calc_save_tave_qsat_ave(ta_list[li],TA_VAR,PRES_VAR,MODEL,\
                                           p_lev_bottom,p_lev_top,dp,time_idx_delta,\
-                                          SAVE_TAVE_QSAT,TAVE_VAR,QSAT_VAR)
+                                          SAVE_TAVE_QSAT,TAVE_VAR,QSAT_AVE_VAR)
         # End-if PREPROCESS_TA==1
         
         print("BINNING...")
@@ -415,7 +442,7 @@ def preprocess_binning_saving(REGION,*argsv):
                             REGION, CWV, RAIN, temp, QSAT, \
                             p0, p1, p2, pe, q0, q1)
             elif BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2:
-                binning_qsat(lon_idx, \
+                binning_qsat_ave(lon_idx, \
                             NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PRECIP_THRESHOLD, \
                             REGION, CWV, RAIN, temp, \
                             p0, p1, p2, pe)
@@ -479,23 +506,23 @@ def preprocess_binning_saving(REGION,*argsv):
         q1[:,:]=Q1
 
     elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
-        qsat=bin_output_netcdf.createDimension(QSAT_VAR,len(qsat_bin_center))
-        temp=bin_output_netcdf.createVariable("qsat",numpy.float64,(QSAT_VAR,))
+        qsat=bin_output_netcdf.createDimension(QSAT_AVE_VAR,len(qsat_bin_center))
+        temp=bin_output_netcdf.createVariable("qsat",numpy.float64,(QSAT_AVE_VAR,))
         temp.units="mm"
         temp[:]=qsat_bin_center
 
-        p0=bin_output_netcdf.createVariable("P0",numpy.float64,("region","cwv",QSAT_VAR))
+        p0=bin_output_netcdf.createVariable("P0",numpy.float64,("region","cwv",QSAT_AVE_VAR))
         p0[:,:,:]=P0
 
-        p1=bin_output_netcdf.createVariable("P1",numpy.float64,("region","cwv",QSAT_VAR))
+        p1=bin_output_netcdf.createVariable("P1",numpy.float64,("region","cwv",QSAT_AVE_VAR))
         p1.units="mm/hr"
         p1[:,:,:]=P1
 
-        p2=bin_output_netcdf.createVariable("P2",numpy.float64,("region","cwv",QSAT_VAR))
+        p2=bin_output_netcdf.createVariable("P2",numpy.float64,("region","cwv",QSAT_AVE_VAR))
         p2.units="mm^2/hr^2"
         p2[:,:,:]=P2
 
-        pe=bin_output_netcdf.createVariable("PE",numpy.float64,("region","cwv",QSAT_VAR))
+        pe=bin_output_netcdf.createVariable("PE",numpy.float64,("region","cwv",QSAT_AVE_VAR))
         pe[:,:,:]=PE
 
     bin_output_netcdf.close()
@@ -506,14 +533,16 @@ def preprocess_binning_saving(REGION,*argsv):
         return cwv_bin_center,tave_bin_center,P0,P1,P2,PE,Q0,Q1
     elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
         return cwv_bin_center,qsat_bin_center,P0,P1,P2,PE,[],[]
-###################################################################################################
-###################################################################################################
-###################################################################################################
+
+# ======================================================================
+# this function loads the binned output calculated from preprocess_binning_saving
+# and prepares it for plotting
+
 def load_binning_output(*argsv):
 
     bin_output_list,\
     TAVE_VAR,\
-    QSAT_VAR,\
+    QSAT_AVE_VAR,\
     BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=argsv[0]
     bin_output_netcdf=Dataset(bin_output_list[0],"r")
 
@@ -528,7 +557,7 @@ def load_binning_output(*argsv):
         Q0=numpy.asarray(bin_output_netcdf.variables["Q0"][:,:],dtype="float")
         Q1=numpy.asarray(bin_output_netcdf.variables["Q1"][:,:],dtype="float") 
     elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
-        temp_bin_center=numpy.asarray(bin_output_netcdf.variables[QSAT_VAR][:],dtype="float")
+        temp_bin_center=numpy.asarray(bin_output_netcdf.variables[QSAT_AVE_VAR][:],dtype="float")
         Q0=[]
         Q1=[]
 
@@ -537,9 +566,12 @@ def load_binning_output(*argsv):
     print("Binning Results Loaded!") 
 
     return cwv_bin_center,temp_bin_center,P0,P1,P2,PE,Q0,Q1
-###################################################################################################
-###################################################################################################
-###################################################################################################
+
+
+# ======================================================================
+# this function takes output from load_binning_output and 
+# saves the figure as a .png file
+
 def plot_save_figure(ret,*argsv1):
 
     cwv_bin_center,\

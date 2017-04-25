@@ -13,32 +13,38 @@ data={}
 
 ### Model output directory & filename ###
 MODEL="AM4-2P"
-MODEL_OUTPUT_DIR="/ninad/baird/c96L48_am4b6_DDFull_MDTF/"
-PREPROCESSING_OUTPUT_DIR="/ninad/baird/c96L48_am4b6_DDFull_MDTF/" # USER MUST HAVE WRITE PERMISSION HERE
+MODEL_OUTPUT_DIR=os.environ["DATADIR"]#"/ninad/baird/c96L48_am4b6_DDFull_MDTF/"
+PREPROCESSING_OUTPUT_DIR=os.environ["DATADIR"]#"/ninad/baird/c96L48_am4b6_DDFull_MDTF/" # USER MUST HAVE WRITE PERMISSION HERE
+
+# ======================================================================
+# Specify how the model filename is structured below
 MODEL_FILENAME_PREFIX="atmos."
 
-#### Variable Names #### (taken from mdtf.py file)
+# ======================================================================
+# Variable Names (import from mdtf.py)
 PR_VAR=os.environ["PRECT_var"]
 PRW_VAR=os.environ["CWV_var"]
 TA_VAR=os.environ["T_3D_var"]
 PRES_VAR=os.environ["level_var"]
 
-## Region mask directory & filename
+# ======================================================================
+# Region mask directory & filename
 REGION_MASK_DIR=os.environ["VARDATA"]
 REGION_MASK_FILENAME="region_0.25x0.25_GOP2.5deg.mat"
 
-## Number of Regions
-# Use region 1 to NUMBER_OF_REGIONS in the mask
+# ======================================================================
+# Number of Regions
+# Use anywhere from 1 to NUMBER_OF_REGIONS (default of 4)
 NUMBER_OF_REGIONS=4
 REGION_STR=["WPac","EPac","Atl","Ind"]
 
-## Directory for saving pre-processed temperature fields
+# ======================================================================
+# Directory for saving pre-processed temperature fields
 # tave [K]: Mass-weighted column average temperature
-# qsat [mm]: Column-integrated saturation specific humidity
-
+# qsat_ave [mm]: Column-integrated saturation specific humidity
 TAVE_QSAT_OUTPUT_DIR = PREPROCESSING_OUTPUT_DIR #MODEL_OUTPUT_DIR
 TAVE_VAR=os.environ["TAVE_var"]
-QSAT_VAR=os.environ["QSAT_AVE_var"]
+QSAT_AVE_VAR=os.environ["QSAT_AVE_var"]
 PRES_VAR=os.environ["level_var"]
 
 ##### Give latitude and longitude names in file ####
@@ -87,10 +93,14 @@ time_idx_delta=1000
 ## Threshold value defining precipitating events [mm/hr]
 PRECIP_THRESHOLD=0.25
 
-############# END USER SPECIFIED SECTION ##########
-
-############# DO NOT MODIFY CODE BELOW UNLESS ########## 
-############# YOU KNOW WHAT YOU ARE DOING ##########
+# ======================================================================
+# END USER SPECIFIED SECTION
+# ======================================================================
+#
+# ======================================================================
+# DO NOT MODIFY CODE BELOW UNLESS
+# YOU KNOW WHAT YOU ARE DOING
+# ======================================================================
 
 data["MODEL"]=MODEL
 data["MODEL_OUTPUT_DIR"]=MODEL_OUTPUT_DIR
@@ -116,7 +126,7 @@ data["REGION_STR"]=REGION_STR
 # qsat [mm]: Column-integrated saturation specific humidity
 data["TAVE_QSAT_OUTPUT_DIR"] = TAVE_QSAT_OUTPUT_DIR#MODEL_OUTPUT_DIR
 data["TAVE_VAR"]=TAVE_VAR
-data["QSAT_VAR"]=QSAT_VAR
+data["QSAT_AVE_VAR"]=QSAT_AVE_VAR
 data["PRES_VAR"]=PRES_VAR
 
 ## Use 1:tave, or 2:qsat as Bulk Tropospheric Temperature Measure 
@@ -129,7 +139,7 @@ data["BIN_OUTPUT_FILENAME"]="onset_diag_output_"+data["MODEL"]
 if BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1:
     data["BIN_OUTPUT_FILENAME"]+="_"+TAVE_VAR
 elif BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2:
-    data["BIN_OUTPUT_FILENAME"]+="_"+QSAT_VAR
+    data["BIN_OUTPUT_FILENAME"]+="_"+QSAT_AVE_VAR
     
 ## Re-do binning even if binning output detected (default: 0)
 data["BIN_ANYWAY"]=BIN_ANYWAY
@@ -171,17 +181,17 @@ data["bin_output_list"]=sorted(glob.glob(data["BIN_OUTPUT_DIR"]+"/"+data["BIN_OU
 ## List available netCDF files
 # Assumes that the corresponding files in each list
 #  have the same spatial/temporal coverage/resolution
-pr_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PR_VAR+".nc"))
-prw_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+PRW_VAR+".nc"))
-ta_list=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TA_VAR+".nc"))
+pr_list=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+"*"+PR_VAR+"*"+".nc"))
+prw_list=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+"*"+PRW_VAR+"*"+".nc"))
+ta_list=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+"*"+TA_VAR+"*"+".nc"))
 
 data["pr_list"] = pr_list
 data["prw_list"] = prw_list
 data["ta_list"] = ta_list
 
 ## Check for pre-processed TAVE & QSAT data
-data["tave_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+TAVE_VAR+".nc"))
-data["qsat_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+MODEL_FILENAME_PREFIX+"*"+QSAT_VAR+".nc"))
+data["tave_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+"*"+TAVE_VAR+"*"+".nc"))
+data["qsat_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+"*"+QSAT_AVE_VAR+"*"+".nc"))
 
 if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1 and len(data["tave_list"])==0) \
     or (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2 and len(data["qsat_list"])==0):
@@ -209,7 +219,7 @@ prw_list, \
 PRW_VAR, \
 data["PREPROCESS_TA"], \
 data["qsat_list"], \
-QSAT_VAR, \
+QSAT_AVE_VAR, \
 data["tave_list"], \
 TAVE_VAR, \
 ta_list, \
@@ -230,7 +240,7 @@ LON_VAR ]
 data["args2"]=[ \
 data["bin_output_list"],\
 TAVE_VAR,\
-QSAT_VAR,\
+QSAT_AVE_VAR,\
 BULK_TROPOSPHERIC_TEMPERATURE_MEASURE ]
 
 with open(os.environ["VARCODE"]+"/bin_parameters.json", "w") as outfile:

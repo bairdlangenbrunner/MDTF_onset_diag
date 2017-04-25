@@ -2,14 +2,20 @@
 import numpy
 import glob
 from netCDF4 import Dataset
-from convective_onset_diag_util import binning_tave,binning_qsat
+from convective_onset_diag_util import binning_tave,binning_qsat_ave
 from convective_onset_diag_util import generate_region_mask
-from convective_onset_diag_util import calc_save_tave_qsat
+from convective_onset_diag_util import calc_save_tave_qsat_ave
 from convective_onset_diag_util import preprocess_binning_saving
 from convective_onset_diag_util import load_binning_output
 from convective_onset_diag_util import plot_save_figure
 import os
 import json
+
+# ======================================================================
+# load user-specified parameters for BINNING and PLOTTING
+# this is in the var_code folder under
+# user_specified_binning_parameters.py and
+# user_specified_plotting_parameters.py
 
 print "LOADING USER SPECIFIED BINNING PARAMETERS"
 ### Create and read user specified parameters ###
@@ -24,30 +30,38 @@ os.system("python "+os.environ["VARCODE"]+"/"+"user_specified_plotting_parameter
 with open(os.environ["VARCODE"]+"/"+"plot_parameters.json") as outfile:
     plot_data=json.load(outfile)
 
-##########
+# ======================================================================
+# check if binned data file exists in var_code
+# if so, skip
+# otherwise, bin data using the full files
 
 if (bin_data["BIN_ANYWAY"] or len(bin_data["bin_output_list"])==0):
 
     print "BINNING"
 
     if bin_data["PREPROCESS_TA"]==1:
-        print("Temperature Pre-processing Required!")
+        print("TEMPERATURE PRE-PROCESSING REQUIRED")
     if bin_data["SAVE_TAVE_QSAT"]==1:
-        print("Pre-processed Temperature Fields (tave & qsat) will be saved!")
+        print("PRE-PROCESSED TEMPERATURE FIELDS (QSAT_AVE AND TAVE) WILL BE SAVED")
 
     ## Load & Pre-process Region Mask
     REGION,lat,lon=generate_region_mask(bin_data["REGION_MASK_DIR"]+"/"+bin_data["REGION_MASK_FILENAME"], bin_data["pr_list"][0])
     ret=preprocess_binning_saving(REGION,bin_data["args1"])
 
-else: # BIN_ANYWAY=0 & binning_output exists
+else: # BIN_ANYWAY=True & binning_output exists
     ret=load_binning_output(bin_data["args2"])
 
 
+# ======================================================================
+# create plot
 # 
 print "PLOTTING"
 # 
 plot_save_figure(ret,plot_data["args3"])
 print "PLOTTING COMPLETE"
+
+# ======================================================================
+# code below adapted from MDTF example
 
 # move the plot to the proper place
 #os.system("mv "+os.environ["WKDIR"]+"/*eof1.ps "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]+"/.")
