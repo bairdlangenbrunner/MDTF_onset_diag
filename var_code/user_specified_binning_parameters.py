@@ -13,8 +13,8 @@ data={}
 
 ### Model output directory & filename ###
 MODEL="AM4-2P"
-MODEL_OUTPUT_DIR=os.environ["DATADIR"]#"/ninad/baird/c96L48_am4b6_DDFull_MDTF/"
-PREPROCESSING_OUTPUT_DIR=os.environ["DATADIR"]#"/ninad/baird/c96L48_am4b6_DDFull_MDTF/" # USER MUST HAVE WRITE PERMISSION HERE
+MODEL_OUTPUT_DIR=os.environ["DATADIR"] # WHERE ORIGINAL MODEL DATA ARE LOCATED
+PREPROCESSING_OUTPUT_DIR=os.environ["DATADIR"] # USER MUST HAVE WRITE PERMISSION HERE
 
 # ======================================================================
 # Specify how the model filename is structured below
