@@ -19,13 +19,13 @@ import subprocess
 # delete PS files or not
 # 1: delete, otherwise not
 
-os.environ["CLEAN"] = "1"
+os.environ["CLEAN"] = "0"
 
 # ======================================================================
 # set case name
 # ======================================================================
 #os.environ["CASENAME"] = "ACCRI_2006_control"
-os.environ["CASENAME"] = "c96L32_am4g9_fullaero_MDTF"
+os.environ["CASENAME"] = "c96L48_am4b6_DDFull_MDTF"
 
 # ======================================================================
 # Year stamp of data
@@ -113,7 +113,7 @@ if os.environ["model"] == 'CESM' :
 if os.environ["model"] == "AM4" :
    os.environ["lat_coord"] = "lat"
    os.environ["lon_coord"] = "lon"   
-   os.environ["lev_coord"] = "pfull" # must be on pressure levels (hPa)
+   os.environ["lev_coord"] = "level" # must be on pressure levels (hPa)
    os.environ["time_coord"] = "time"   
    os.environ["lat_var"] = "lat"   
    os.environ["lon_var"] = "lon"
@@ -128,7 +128,7 @@ if os.environ["model"] == "AM4" :
 os.environ["TAVE_var"] = "tave" # vertically integrated temperature
 os.environ["QSAT_AVE_var"] = "qsat" # vertically integrated saturation specific water vapor
 os.environ["REGION_var"] = "region"
-   
+os.environ["RES"] = "1.00" # spatial resolution for comparision with observation (0.25, 0.50, 1.00)
 # ======================================================================
 # Software 
 # ======================================================================
