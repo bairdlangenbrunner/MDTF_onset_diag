@@ -21,7 +21,7 @@ CWV_RANGE_THRESHOLD=60
 CP_THRESHOLD=0.2
 
 FIG_OUTPUT_DIR=bin_data["BIN_OUTPUT_DIR"]
-FIG_OUTPUT_FILENAME="/"+bin_data["BIN_OUTPUT_FILENAME"]+".png"
+FIG_OUTPUT_FILENAME="/"+os.environ["CASENAME"]+".onset_diag.png"
 
 
 #####################################

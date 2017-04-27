@@ -12,7 +12,7 @@ data={}
 #####################################
 
 ### Model output directory & filename ###
-MODEL="AM4-2P"
+MODEL="AM4-DCS"
 MODEL_OUTPUT_DIR=os.environ["DATADIR"] # WHERE ORIGINAL MODEL DATA ARE LOCATED
 
 # ======================================================================
@@ -54,7 +54,7 @@ LON_VAR=os.environ["lon_var"]
 BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=1
 
 ## Directory & Filename for saving binned results (netCDF4)
-BIN_OUTPUT_FILENAME="onset_diag_output_"+MODEL
+BIN_OUTPUT_FILENAME=os.environ["CASENAME"]+".onset_diag_output"
     
 ## Re-do binning even if binning output detected (default: False)
 BIN_ANYWAY=False
@@ -131,14 +131,16 @@ data["PRES_VAR"]=PRES_VAR
 data["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"]=BULK_TROPOSPHERIC_TEMPERATURE_MEASURE
 
 ## Directory & Filename for saving binned results (netCDF4)
-data["BIN_OUTPUT_DIR"] = os.environ["VARDATA"]
-data["BIN_OUTPUT_FILENAME"]="onset_diag_output_"+data["MODEL"]
+data["BIN_OUTPUT_DIR"] = os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]#os.environ["VARDATA"]
+data["BIN_OUTPUT_FILENAME"]=os.environ["CASENAME"]+".onset_diag_output"
 
 if BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1:
     data["BIN_OUTPUT_FILENAME"]+="_"+TAVE_VAR
+    data["TEMP_VAR"]=TAVE_VAR
 elif BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2:
     data["BIN_OUTPUT_FILENAME"]+="_"+QSAT_AVE_VAR
-    
+    data["TEMP_VAR"]=QSAT_AVE_VAR
+
 ## Re-do binning even if binning output detected (default: 0)
 data["BIN_ANYWAY"]=BIN_ANYWAY
     
