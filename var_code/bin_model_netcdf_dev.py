@@ -32,6 +32,7 @@ print("...Loaded!")
 # check if binned data file exists in var_code
 # if so, skip
 # otherwise, bin data using the full files
+
 if (bin_data["BIN_ANYWAY"] or len(bin_data["bin_output_list"])==0):
 
     print("Starting binning procedure...")
@@ -63,6 +64,9 @@ print('Creating HTML...'),
 # remove binning outputs, if CLEAN = 1
 if os.environ["CLEAN"] == "1":
     os.system("rm -f "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]+"/"+data["BIN_OUTPUT_FILENAME"]+".nc")
+ 
+# move newly-created figure into the directory for placing plots in HTML
+os.system("cp "+os.environ["VARDATA"]+"/*"+os.environ["CASENAME"]+"*.png "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]+"/")
 
 # copy plots of OBS 
 os.system("cp "+os.environ["VARDATA"]+"/R2_TMIv7r1_200206_201405_res="+os.environ["RES"]+"_fillNrCWV_onset_diag_"+bin_data["TEMP_VAR"]+".png "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/obs/")

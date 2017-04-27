@@ -17,7 +17,7 @@ MODEL_OUTPUT_DIR=os.environ["DATADIR"] # WHERE ORIGINAL MODEL DATA ARE LOCATED
 
 # ======================================================================
 # Specify how the model filename is structured below
-MODEL_FILENAME_PREFIX="atmos."
+#MODEL_FILENAME_PREFIX="atmos."
 
 # ======================================================================
 # Variable Names (import from mdtf.py)
@@ -104,7 +104,7 @@ PRECIP_THRESHOLD=0.25
 data["MODEL"]=MODEL
 data["MODEL_OUTPUT_DIR"]=MODEL_OUTPUT_DIR
 data["PREPROCESSING_OUTPUT_DIR"]=PREPROCESSING_OUTPUT_DIR
-data["MODEL_FILENAME_PREFIX"]=MODEL_FILENAME_PREFIX
+#data["MODEL_FILENAME_PREFIX"]=MODEL_FILENAME_PREFIX
 
 # data["PR_VAR"]=PR_VAR
 # data["PRW_VAR"]=PRW_VAR
@@ -131,8 +131,9 @@ data["PRES_VAR"]=PRES_VAR
 data["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"]=BULK_TROPOSPHERIC_TEMPERATURE_MEASURE
 
 ## Directory & Filename for saving binned results (netCDF4)
-data["BIN_OUTPUT_DIR"] = os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]#os.environ["VARDATA"]
+data["BIN_OUTPUT_DIR"] = os.environ["VARDATA"] #os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]#os.environ["VARDATA"]
 data["BIN_OUTPUT_FILENAME"]=os.environ["CASENAME"]+".onset_diag_output"
+
 
 if BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1:
     data["BIN_OUTPUT_FILENAME"]+="_"+TAVE_VAR
