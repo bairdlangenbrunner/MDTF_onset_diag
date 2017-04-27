@@ -25,7 +25,7 @@ os.environ["CLEAN"] = "1"
 # set case name
 # ======================================================================
 #os.environ["CASENAME"] = "ACCRI_2006_control"
-os.environ["CASENAME"] = "c96L48_am4b6_DDFull_MDTF"
+os.environ["CASENAME"] = "c96L32_am4g9_fullaero_MDTF"
 
 # ======================================================================
 # Year stamp of data
@@ -55,7 +55,7 @@ os.environ["WKDIR"] = os.getcwd()+"/wkdir/"+os.environ["CASENAME"]
 # INPUT: directory of model output
 
 #os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
-os.environ["DATADIR"] = "/ninad/baird/"+os.environ["CASENAME"]
+os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
 
 # ======================================================================
 #OUTPUT
@@ -67,7 +67,7 @@ os.environ["WEBDIR"] = os.getcwd()+"/web/"
 # set variable names and files
 # ======================================================================
 #os.environ["model"] = "CESM"
-os.environ["model"] = "GFDL_onset_diag"
+os.environ["model"] = "AM4"
 
 if os.environ["model"] == 'CESM' :
    os.environ["hyam_var"] = "hyam"
@@ -105,11 +105,15 @@ if os.environ["model"] == 'CESM' :
    os.environ["file_path"] = os.environ["DATADIR"]
    os.environ["file_Z3"] = os.environ["CASENAME"]+"."+os.environ["Z3_var"]+".nc"
    os.environ["file_PS"] = os.environ["CASENAME"]+"."+os.environ["PS_var"]+".nc"
-
-if os.environ["model"] == "GFDL_onset_diag" :
+   #
+   os.environ["T_3D_var"] = "ta" # if 3D temperature exists   
+   os.environ["PRECT_var"] = "pr"   
+   os.environ["CWV_var"] = "prw" # precipitable water
+   
+if os.environ["model"] == "AM4" :
    os.environ["lat_coord"] = "lat"
    os.environ["lon_coord"] = "lon"   
-   os.environ["lev_coord"] = "level" # must be on pressure levels (hPa)
+   os.environ["lev_coord"] = "pfull" # must be on pressure levels (hPa)
    os.environ["time_coord"] = "time"   
    os.environ["lat_var"] = "lat"   
    os.environ["lon_var"] = "lon"
@@ -119,10 +123,11 @@ if os.environ["model"] == "GFDL_onset_diag" :
    os.environ["T_3D_var"] = "ta" # if 3D temperature exists
    os.environ["PS_var"] = "PS"
    os.environ["CWV_var"] = "PRW" # precipitable water
-   # once pre-processed variables are done:
-   os.environ["TAVE_var"] = "tave" # vertically integrated temperature
-   os.environ["QSAT_AVE_var"] = "qsat" # vertically integrated saturation specific water vapor
-   os.environ["REGION_var"] = "region"
+
+# once pre-processed variables are done:
+os.environ["TAVE_var"] = "tave" # vertically integrated temperature
+os.environ["QSAT_AVE_var"] = "qsat" # vertically integrated saturation specific water vapor
+os.environ["REGION_var"] = "region"
    
 # ======================================================================
 # Software 
