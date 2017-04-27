@@ -14,7 +14,6 @@ data={}
 ### Model output directory & filename ###
 MODEL="AM4-2P"
 MODEL_OUTPUT_DIR=os.environ["DATADIR"] # WHERE ORIGINAL MODEL DATA ARE LOCATED
-PREPROCESSING_OUTPUT_DIR=os.environ["DATADIR"] # USER MUST HAVE WRITE PERMISSION HERE
 
 # ======================================================================
 # Specify how the model filename is structured below
@@ -42,7 +41,7 @@ REGION_STR=["WPac","EPac","Atl","Ind"]
 # Directory for saving pre-processed temperature fields
 # tave [K]: Mass-weighted column average temperature
 # qsat_ave [mm]: Column-integrated saturation specific humidity
-TAVE_QSAT_OUTPUT_DIR = PREPROCESSING_OUTPUT_DIR #MODEL_OUTPUT_DIR
+PREPROCESSING_OUTPUT_DIR=os.environ["DATADIR"] # USER MUST HAVE WRITE PERMISSION HERE
 TAVE_VAR=os.environ["TAVE_var"]
 QSAT_AVE_VAR=os.environ["QSAT_AVE_var"]
 PRES_VAR=os.environ["level_var"]
@@ -124,7 +123,6 @@ data["REGION_STR"]=REGION_STR
 ## Directory for saving pre-processed temperature fields
 # tave [K]: Mass-weighted column average temperature
 # qsat [mm]: Column-integrated saturation specific humidity
-data["TAVE_QSAT_OUTPUT_DIR"] = TAVE_QSAT_OUTPUT_DIR#MODEL_OUTPUT_DIR
 data["TAVE_VAR"]=TAVE_VAR
 data["QSAT_AVE_VAR"]=QSAT_AVE_VAR
 data["PRES_VAR"]=PRES_VAR
@@ -218,6 +216,7 @@ PR_VAR, \
 prw_list, \
 PRW_VAR, \
 data["PREPROCESS_TA"], \
+MODEL_OUTPUT_DIR, \
 data["qsat_list"], \
 QSAT_AVE_VAR, \
 data["tave_list"], \

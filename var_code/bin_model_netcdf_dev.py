@@ -1,15 +1,13 @@
 # Import Python Packages
 import numpy
 import glob
+import os
+import json
 from netCDF4 import Dataset
-from convective_onset_diag_util import binning_tave,binning_qsat_ave
 from convective_onset_diag_util import generate_region_mask
-from convective_onset_diag_util import calc_save_tave_qsat_ave
 from convective_onset_diag_util import preprocess_binning_saving
 from convective_onset_diag_util import load_binning_output
 from convective_onset_diag_util import plot_save_figure
-import os
-import json
 
 # ======================================================================
 # load user-specified parameters for BINNING and PLOTTING
@@ -17,48 +15,46 @@ import json
 # user_specified_binning_parameters.py and
 # user_specified_plotting_parameters.py
 
-print "LOADING USER SPECIFIED BINNING PARAMETERS"
+print("Load user-specified binning parameters..."),
 ### Create and read user specified parameters ###
 os.system("python "+os.environ["VARCODE"]+"/"+"user_specified_binning_parameters.py")
-
 with open(os.environ["VARCODE"]+"/"+"bin_parameters.json") as outfile:
     bin_data=json.load(outfile)
+print("...Loaded!")
 
-print "LOADING USER SPECIFIED PLOTTING PARAMETERS"
+print("Load user-specified plotting parameters..."),
 os.system("python "+os.environ["VARCODE"]+"/"+"user_specified_plotting_parameters.py")
-
 with open(os.environ["VARCODE"]+"/"+"plot_parameters.json") as outfile:
     plot_data=json.load(outfile)
+print("...Loaded!")
 
 # ======================================================================
 # check if binned data file exists in var_code
 # if so, skip
 # otherwise, bin data using the full files
-
 if (bin_data["BIN_ANYWAY"] or len(bin_data["bin_output_list"])==0):
 
-    print "BINNING"
+    print("Starting binning procedure...")
 
     if bin_data["PREPROCESS_TA"]==1:
-        print("TEMPERATURE PRE-PROCESSING REQUIRED")
+        print("   Atmospheric temperature pre-processing required")
     if bin_data["SAVE_TAVE_QSAT"]==1:
-        print("PRE-PROCESSED TEMPERATURE FIELDS (QSAT_AVE AND TAVE) WILL BE SAVED")
+        print("      Pre-processed temperature fields ("\
+            +os.environ["TAVE_var"]+" & "+os.environ["QSAT_AVE_var"]\
+            +") will be saved to "+bin_data["PREPROCESSING_OUTPUT_DIR"])
 
     ## Load & Pre-process Region Mask
     REGION,lat,lon=generate_region_mask(bin_data["REGION_MASK_DIR"]+"/"+bin_data["REGION_MASK_FILENAME"], bin_data["pr_list"][0])
-    ret=preprocess_binning_saving(REGION,bin_data["args1"])
+
+    binning_output=preprocess_binning_saving(REGION,bin_data["args1"])
 
 else: # BIN_ANYWAY=True & binning_output exists
-    ret=load_binning_output(bin_data["args2"])
-
-
+    print("Binned output detected")
+    binning_output=load_binning_output(bin_data["args2"])
+    
 # ======================================================================
 # create plot
-# 
-print "PLOTTING"
-# 
-plot_save_figure(ret,plot_data["args3"])
-print "PLOTTING COMPLETE"
+plot_save_figure(binning_output,plot_data["args3"])
 
 # ======================================================================
 # code below adapted from MDTF example
