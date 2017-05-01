@@ -58,7 +58,7 @@ os.environ["WKDIR"] = os.getcwd()+"/wkdir/"+os.environ["CASENAME"]
 
 #os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
 #os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
-os.environ["DATADIR"] = "/media/kyh/asuka/ncar/"+os.environ["CASENAME"]
+os.environ["DATADIR"] = "/ninad/baird/"+os.environ["CASENAME"]
 
 # ======================================================================
 #OUTPUT
