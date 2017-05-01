@@ -6,7 +6,7 @@
 #    C. Martinez (UCLA), C.-C. (Jack) Chen (NCAR)
 #   PI: J. David Neelin (UCLA)
 #
-#   Computes a set of Convective Transition Statistics following Holloway and Neelin (2009),
+#   Computes a set of Convective Transition Statistics following Neelin et al. (2009),
 #    Schiro et al. (2016), Kuo et al. (2017, 201?)
 #  
 #   Generates plots of:

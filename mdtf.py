@@ -114,6 +114,8 @@ if os.environ["model"] == 'CESM' :
    os.environ["file_path"] = os.environ["DATADIR"]
    os.environ["file_Z3"] = os.environ["CASENAME"]+"."+os.environ["Z3_var"]+".nc"
    os.environ["file_PS"] = os.environ["CASENAME"]+"."+os.environ["PS_var"]+".nc"
+
+   # ------------------------------------------------------------------------
    # Variables for Convective Transition Diagnostics package:
    os.environ["T_3D_var"] = "ta" # if 3D temperature exists   
    os.environ["PRECT_var"] = "pr"   
@@ -123,7 +125,9 @@ if os.environ["model"] == 'CESM' :
    os.environ["file_T_3D"] = "NCAR-CAM5.atmos.*."+os.environ["T_3D_var"]+".nc"
    os.environ["file_TAVE"] = "NCAR-CAM5.atmos.*."+os.environ["TAVE_var"]+".nc"
    os.environ["file_QSAT_AVE"] = "NCAR-CAM5.atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
-   
+   # ------------------------------------------------------------------------
+
+
 if os.environ["model"] == "AM4" :
    os.environ["lat_coord"] = "lat"
    os.environ["lon_coord"] = "lon"   
@@ -136,6 +140,8 @@ if os.environ["model"] == "AM4" :
    os.environ["prect_conversion_factor"] = "1" #units = m/s
    os.environ["precc_conversion_factor"] = "1" #units = m/s
    os.environ["precl_conversion_factor"] = "1" #units = m/s
+   
+   # ------------------------------------------------------------------------
    # Variables for Convective Transition Diagnostics package:
    os.environ["PRECT_var"] = "pr"   
    os.environ["T_3D_var"] = "ta" # if 3D temperature exists
@@ -145,6 +151,7 @@ if os.environ["model"] == "AM4" :
    os.environ["file_T_3D"] = "atmos.*."+os.environ["T_3D_var"]+".nc"
    os.environ["file_TAVE"] = "atmos.*."+os.environ["TAVE_var"]+".nc"
    os.environ["file_QSAT_AVE"] = "atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
+   # ------------------------------------------------------------------------
  
 # ======================================================================
 # Software 
@@ -260,13 +267,18 @@ os.chdir(os.environ["WKDIR"])
 # python my_great_plots.py
 # ======================================================================
 # Convective Transition Diagnostics
-#   Depend on the following scripts/files:
+#   Depends on the following scripts/files:
 #     (1) var_code/convective_transition_diag_model_v1r0.py
 #     (2) var_code/convective_transition_diag_model_util.py
 #     (3) var_code/user_specified_binning_parameters.py
 #     (4) var_code/user_specified_plotting_parameters.py
 #     (5) var_data/region_0.25x0.25_GOP2.5deg.mat
 #     (6) R2_TMIv7r1_..._onset_diag_....png
+#   This package requires 3 2-D model fields (or 3-D input to create these):
+#     (1) precipitation rate
+#     (2) vertically-integrated temperature (or saturation specific humidity) 
+#     (3) column water vapor (CWV, or precipitable water vapor)
+#   For further documentation & user options, see comments in convective_transition_diag_model_v1r0.py
 os.system("python "+os.environ["VARCODE"]+"/convective_transition_diag_model_v1r0.py")
 
 # ======================================================================
