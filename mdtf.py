@@ -13,7 +13,7 @@ import subprocess
 # If using NCL, need to point to it 
 #set NCARG_ROOT
 
-#os.environ["NCARG_ROOT"]="/usr/bin/ncl" # Not needed for convective diagnostics (Neelin group)
+#os.environ["NCARG_ROOT"]="/usr/bin/ncl"
 
 # ======================================================================
 # delete PS files or not
@@ -24,8 +24,10 @@ os.environ["CLEAN"] = "0"
 # ======================================================================
 # set case name
 # ======================================================================
-#os.environ["CASENAME"] = "ACCRI_2006_control"
-os.environ["CASENAME"] = "c96L48_am4b6_DDFull_MDTF"
+#os.environ["CASENAME"] = "c192L48_am4b6_DDFull_MDTF"
+#os.environ["CASENAME"] = "c96L48_am4b6_DDFull_MDTF"
+#os.environ["CASENAME"] = "c96L32_am4g9_fullaero_MDTF"
+os.environ["CASENAME"] = "cam5p3"
 
 # ======================================================================
 # Year stamp of data
@@ -55,7 +57,8 @@ os.environ["WKDIR"] = os.getcwd()+"/wkdir/"+os.environ["CASENAME"]
 # INPUT: directory of model output
 
 #os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
-os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
+#os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
+os.environ["DATADIR"] = "/media/kyh/asuka/ncar/"+os.environ["CASENAME"]
 
 # ======================================================================
 #OUTPUT
@@ -66,8 +69,14 @@ os.environ["WEBDIR"] = os.getcwd()+"/web/"
 # ======================================================================
 # set variable names and files
 # ======================================================================
-#os.environ["model"] = "CESM"
-os.environ["model"] = "AM4"
+# Variables for Convective Transition Diagnostics package:
+os.environ["TAVE_var"] = "tave" # Mass-Weighted Column Average Tropospheric Temperature
+os.environ["QSAT_AVE_var"] = "qsat" # Vertically-Integrated Saturation Specific Humidity
+os.environ["RES"] = "1.00" # Spatial Resolution (degree) for TMI Data (0.25, 0.50, 1.00)
+
+#MODEL
+os.environ["model"] = "CESM"
+#os.environ["model"] = "AM4"
 
 if os.environ["model"] == 'CESM' :
    os.environ["hyam_var"] = "hyam"
@@ -81,7 +90,7 @@ if os.environ["model"] == 'CESM' :
    os.environ["time_var"] = "time"  
    os.environ["U_var"] = "U"   
    os.environ["Z3_var"] = "Z3"
-   os.environ["PRECT_var"] = "PRECT"   
+   #os.environ["PRECT_var"] = "PRECT"   
    os.environ["PRECC_var"] = "PRECC"
    os.environ["PRECL_var"] = "PRECL"
    os.environ["FLUT_var"] = "FLUT"
@@ -99,16 +108,21 @@ if os.environ["model"] == 'CESM' :
    os.environ["U850_var"] = "U850"
    os.environ["V850_var"] = "V850"
    os.environ["OMEGA500_var"] = "OMEGA500"
-   os.environ["prect_conversion_factor"] = "1" #units = m/s
+   os.environ["prect_conversion_factor"] = "1000000" #units = m/s
    os.environ["precc_conversion_factor"] = "1" #units = m/s
    os.environ["precl_conversion_factor"] = "1" #units = m/s
    os.environ["file_path"] = os.environ["DATADIR"]
    os.environ["file_Z3"] = os.environ["CASENAME"]+"."+os.environ["Z3_var"]+".nc"
    os.environ["file_PS"] = os.environ["CASENAME"]+"."+os.environ["PS_var"]+".nc"
-   #
+   # Variables for Convective Transition Diagnostics package:
    os.environ["T_3D_var"] = "ta" # if 3D temperature exists   
    os.environ["PRECT_var"] = "pr"   
-   os.environ["CWV_var"] = "prw" # precipitable water
+   os.environ["CWV_var"] = "prw" # Column Water Vapor (precipitable water vapor)
+   os.environ["file_PRECT"] = "NCAR-CAM5.atmos.*."+os.environ["PRECT_var"]+".nc"
+   os.environ["file_CWV"] = "NCAR-CAM5.atmos.*."+os.environ["CWV_var"]+".nc"
+   os.environ["file_T_3D"] = "NCAR-CAM5.atmos.*."+os.environ["T_3D_var"]+".nc"
+   os.environ["file_TAVE"] = "NCAR-CAM5.atmos.*."+os.environ["TAVE_var"]+".nc"
+   os.environ["file_QSAT_AVE"] = "NCAR-CAM5.atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
    
 if os.environ["model"] == "AM4" :
    os.environ["lat_coord"] = "lat"
@@ -118,17 +132,20 @@ if os.environ["model"] == "AM4" :
    os.environ["lat_var"] = "lat"   
    os.environ["lon_var"] = "lon"
    os.environ["time_var"] = "time"
-   os.environ["level_var"] = "level"
+   os.environ["PS_var"] = "PS"
+   os.environ["prect_conversion_factor"] = "1" #units = m/s
+   os.environ["precc_conversion_factor"] = "1" #units = m/s
+   os.environ["precl_conversion_factor"] = "1" #units = m/s
+   # Variables for Convective Transition Diagnostics package:
    os.environ["PRECT_var"] = "pr"   
    os.environ["T_3D_var"] = "ta" # if 3D temperature exists
-   os.environ["PS_var"] = "PS"
-   os.environ["CWV_var"] = "PRW" # precipitable water
-
-# once pre-processed variables are done:
-os.environ["TAVE_var"] = "tave" # vertically integrated temperature
-os.environ["QSAT_AVE_var"] = "qsat" # vertically integrated saturation specific water vapor
-os.environ["REGION_var"] = "region"
-os.environ["RES"] = "1.00" # spatial resolution for comparision with observation (0.25, 0.50, 1.00)
+   os.environ["CWV_var"] = "PRW" # Column Water Vapor (precipitable water vapor)
+   os.environ["file_PRECT"] = "atmos.*."+os.environ["PRECT_var"]+".nc"
+   os.environ["file_CWV"] = "atmos.*."+os.environ["CWV_var"]+".nc"
+   os.environ["file_T_3D"] = "atmos.*."+os.environ["T_3D_var"]+".nc"
+   os.environ["file_TAVE"] = "atmos.*."+os.environ["TAVE_var"]+".nc"
+   os.environ["file_QSAT_AVE"] = "atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
+ 
 # ======================================================================
 # Software 
 # ======================================================================
@@ -237,14 +254,20 @@ os.chdir(os.environ["WKDIR"])
 #   (B) Converts plots to png
 #   (C) Adds plot links to HTML file
 #os.system("python "+os.environ["VARCODE"]+"/eof_plots.py")
-os.system("python "+os.environ["VARCODE"]+"/bin_model_netcdf_dev.py")
 # ======================================================================
 # ADD USER CODE HERE: code will
 # (a) call plotting routine and (b) move plots and add to web page
 # python my_great_plots.py
 # ======================================================================
-
-
+# Convective Transition Diagnostics
+#   Depend on the following scripts/files:
+#     (1) var_code/convective_transition_diag_model_v1r0.py
+#     (2) var_code/convective_transition_diag_model_util.py
+#     (3) var_code/user_specified_binning_parameters.py
+#     (4) var_code/user_specified_plotting_parameters.py
+#     (5) var_data/region_0.25x0.25_GOP2.5deg.mat
+#     (6) R2_TMIv7r1_..._onset_diag_....png
+os.system("python "+os.environ["VARCODE"]+"/convective_transition_diag_model_v1r0.py")
 
 # ======================================================================
 #  DO NOT modify: finish html file
