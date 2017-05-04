@@ -613,9 +613,10 @@ def load_binned_output(*argsv):
 # plot_save_figure
 #  takes output from load_binned_output and saves the figure as a .png file
 
-def plot_save_figure(ret,*argsv1):
-    
+def plot_save_figure(ret,argsv2,*argsv1):
+
     print("Plotting..."),
+
 
     cwv_bin_center,\
     temp_bin_center,\
@@ -637,6 +638,8 @@ def plot_save_figure(ret,*argsv1):
     PRECIP_THRESHOLD,\
     FIG_OUTPUT_DIR,\
     FIG_OUTPUT_FILENAME=argsv1[0]
+
+    fig_params=argsv2
 
     # Post-binning Processing before Plotting
     P0[P0==0.0]=numpy.nan
@@ -691,10 +694,7 @@ def plot_save_figure(ret,*argsv1):
     # http://matplotlib.org/examples/color/colormaps_reference.html
     scatter_colors = cm.jet(numpy.linspace(0,1,TEMP_MAX-TEMP_MIN+1,endpoint=True))
 
-    axes_fontsize = 12 # size of font in all plots
-    legend_fontsize = 9
-    marker_size = 40 # size of markers in scatter plots
-    xtick_pad = 10 # padding between x tick labels and actual plot
+    axes_fontsize,legend_fonsize,marker_size,xtick_pad = fig_params['f0'] 
 
     # create figure canvas
     fig = mp.figure(figsize=(14,12))
@@ -702,10 +702,10 @@ def plot_save_figure(ret,*argsv1):
     for reg in numpy.arange(NUMBER_OF_REGIONS):
         # create figure 1
         ax1 = fig.add_subplot(NUMBER_OF_REGIONS,4,1+reg*NUMBER_OF_REGIONS)
-        ax1.set_xlim(10,80)
-        ax1.set_ylim(0,8)
-        ax1.set_xticks([10,20,30,40,50,60,70,80])
-        ax1.set_yticks([0,1,2,3,4,5,6,7,8])
+        ax1.set_xlim(fig_params['f1'][0])
+        ax1.set_ylim(fig_params['f1'][1])
+        ax1.set_xticks(fig_params['f1'][4])
+        ax1.set_yticks(fig_params['f1'][5])
         ax1.tick_params(labelsize=axes_fontsize)
         ax1.tick_params(axis="x", pad=10)
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
@@ -720,8 +720,8 @@ def plot_save_figure(ret,*argsv1):
                                 edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
                                 s=marker_size,clip_on=True,zorder=3,\
                                 label="{:.1f}".format(temp_bin_center[Tidx]))
-        ax1.set_ylabel("Precip (mm hr$^-$$^1$)", fontsize=axes_fontsize)
-        ax1.set_xlabel("CWV (mm)", fontsize=axes_fontsize)
+        ax1.set_ylabel(fig_params['f1'][2], fontsize=axes_fontsize)
+        ax1.set_xlabel(fig_params['f1'][3], fontsize=axes_fontsize)
         ax1.grid()
         ax1.set_axisbelow(True)
 
@@ -733,19 +733,21 @@ def plot_save_figure(ret,*argsv1):
 
         # create figure 2 (probability pickup)
         ax2 = fig.add_subplot(NUMBER_OF_REGIONS,4,2+reg*NUMBER_OF_REGIONS)
-        ax2.set_xlim(10,80)
-        ax2.set_ylim(0,1)
-        ax2.set_xticks([10,20,30,40,50,60,70,80])
-        ax2.set_yticks([0.0,0.2,0.4,0.6,0.8,1.0])
+        ax2.set_xlim(fig_params['f2'][0])
+        ax2.set_ylim(fig_params['f2'][1])
+        ax2.set_xticks(fig_params['f2'][4])
+        ax2.set_yticks(fig_params['f2'][5])
         ax2.tick_params(labelsize=axes_fontsize)
         ax2.tick_params(axis="x", pad=xtick_pad)
+ 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax2.scatter(cwv_bin_center,cp[reg,:,Tidx],\
                             edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
                             s=marker_size,clip_on=True,zorder=3)
-        ax2.set_ylabel("Probability of Precip", fontsize=axes_fontsize)
-        ax2.set_xlabel("CWV (mm)", fontsize=axes_fontsize)
+        ax2.set_ylabel(fig_params['f2'][2], fontsize=axes_fontsize)
+
+        ax2.set_xlabel(fig_params['f2'][3], fontsize=axes_fontsize)
         ax2.text(0.05, 0.95, MODEL, transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
         ax2.text(0.05, 0.85, REGION_STR[reg], transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
         ax2.grid()
@@ -754,36 +756,41 @@ def plot_save_figure(ret,*argsv1):
         # create figure 3 (normalized PDF)
         ax3 = fig.add_subplot(NUMBER_OF_REGIONS,4,3+reg*NUMBER_OF_REGIONS)
         ax3.set_yscale("log")
-        ax3.set_ylim(1e-5,5e-2)
-        ax3.set_xlim(10,80)
-        ax3.set_xticks([10,20,30,40,50,60,70,80])
+	ax3.set_xlim(fig_params['f3'][0])
+        ax3.set_ylim(fig_params['f3'][1])
+        ax3.set_xticks(fig_params['f3'][4])
         ax3.tick_params(labelsize=axes_fontsize)
         ax3.tick_params(axis="x", pad=xtick_pad)
+ 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax3.scatter(cwv_bin_center,PDF[reg,:,Tidx],\
                             edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
                             s=marker_size,clip_on=True,zorder=3)
-        ax3.set_ylabel("PDF (mm$^-$$^1$)", fontsize=axes_fontsize)
-        ax3.set_xlabel("CWV (mm)", fontsize=axes_fontsize)
+	ax3.set_ylabel(fig_params['f3'][2], fontsize=axes_fontsize)
+
+        ax3.set_xlabel(fig_params['f3'][3], fontsize=axes_fontsize)
+ 
         ax3.grid()
         ax3.set_axisbelow(True)
 
         # create figure 4 (normalized PDF - precipitation)
         ax4 = fig.add_subplot(NUMBER_OF_REGIONS,4,4+reg*NUMBER_OF_REGIONS)
-        ax4.set_yscale("log")
-        ax4.set_ylim(1e-5,5e-2)
-        ax4.set_xlim(10,80)
-        ax4.set_xticks([10,20,30,40,50,60,70,80])
+	ax4.set_yscale("log")
+	ax4.set_xlim(fig_params['f4'][0])
+        ax4.set_ylim(fig_params['f4'][1])
+        ax4.set_xticks(fig_params['f4'][4])
         ax4.tick_params(labelsize=axes_fontsize)
         ax4.tick_params(axis="x", pad=xtick_pad)
+ 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax4.scatter(cwv_bin_center,pdf_pe[reg,:,Tidx],\
                             edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
                             s=marker_size,clip_on=True,zorder=3)
-        ax4.set_ylabel("PDF (mm$^-$$^1$)", fontsize=axes_fontsize)
-        ax4.set_xlabel("CWV (mm)", fontsize=axes_fontsize)
+	ax4.set_ylabel(fig_params['f4'][2], fontsize=axes_fontsize)
+
+        ax4.set_xlabel(fig_params['f4'][3], fontsize=axes_fontsize)
         ax4.text(0.05, 0.95, "Precip > "+str(PRECIP_THRESHOLD)+" mm hr$^-$$^1$" , transform=ax4.transAxes, fontsize=12, verticalalignment="top")
         ax4.grid()
         ax4.set_axisbelow(True)
