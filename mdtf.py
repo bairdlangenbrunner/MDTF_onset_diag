@@ -57,8 +57,8 @@ os.environ["WKDIR"] = os.getcwd()+"/wkdir/"+os.environ["CASENAME"]
 # INPUT: directory of model output
 
 #os.environ["DATADIR"] = os.getcwd()+"/"+os.environ["CASENAME"]
-#os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
-os.environ["DATADIR"] = "/ninad/baird/"+os.environ["CASENAME"]
+os.environ["DATADIR"] = "/home/yhkuo/Downloads/"+os.environ["CASENAME"]
+#os.environ["DATADIR"] = "/ninad/baird/"+os.environ["CASENAME"]
 
 # ======================================================================
 #OUTPUT
@@ -71,7 +71,7 @@ os.environ["WEBDIR"] = os.getcwd()+"/web/"
 # ======================================================================
 # Variables for Convective Transition Diagnostics package:
 os.environ["TAVE_var"] = "tave" # Mass-Weighted Column Average Tropospheric Temperature
-os.environ["QSAT_AVE_var"] = "qsat" # Vertically-Integrated Saturation Specific Humidity
+os.environ["QSAT_INT_var"] = "qsat_int" # Vertically-Integrated Saturation Specific Humidity
 os.environ["RES"] = "1.00" # Spatial Resolution (degree) for TMI Data (0.25, 0.50, 1.00)
 
 #MODEL
@@ -124,7 +124,7 @@ if os.environ["model"] == 'CESM' :
    os.environ["file_CWV"] = "NCAR-CAM5.atmos.*."+os.environ["CWV_var"]+".nc"
    os.environ["file_T_3D"] = "NCAR-CAM5.atmos.*."+os.environ["T_3D_var"]+".nc"
    os.environ["file_TAVE"] = "NCAR-CAM5.atmos.*."+os.environ["TAVE_var"]+".nc"
-   os.environ["file_QSAT_AVE"] = "NCAR-CAM5.atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
+   os.environ["file_QSAT_INT"] = "NCAR-CAM5.atmos.*."+os.environ["QSAT_INT_var"]+".nc"
    # ------------------------------------------------------------------------
 
 
@@ -150,7 +150,7 @@ if os.environ["model"] == "AM4" :
    os.environ["file_CWV"] = "atmos.*."+os.environ["CWV_var"]+".nc"
    os.environ["file_T_3D"] = "atmos.*."+os.environ["T_3D_var"]+".nc"
    os.environ["file_TAVE"] = "atmos.*."+os.environ["TAVE_var"]+".nc"
-   os.environ["file_QSAT_AVE"] = "atmos.*."+os.environ["QSAT_AVE_var"]+".nc"
+   os.environ["file_QSAT_INT"] = "atmos.*."+os.environ["QSAT_INT_var"]+".nc"
    # ------------------------------------------------------------------------
  
 # ======================================================================
@@ -268,18 +268,18 @@ os.chdir(os.environ["WKDIR"])
 # ======================================================================
 # Convective Transition Diagnostics
 #   Depends on the following scripts/files:
-#     (1) var_code/convective_transition_diag_model_v1r0.py
-#     (2) var_code/convective_transition_diag_model_util.py
-#     (3) var_code/user_specified_binning_parameters.py
-#     (4) var_code/user_specified_plotting_parameters.py
+#     (1) var_code/convective_transition_diag_v1r0.py
+#     (2) var_code/convecTransStats_util.py
+#     (3) var_code/convecTransStats_usp_calc.py
+#     (4) var_code/convecTransStats_usp_plot.py
 #     (5) var_data/region_0.25x0.25_GOP2.5deg.mat
 #     (6) R2_TMIv7r1_..._onset_diag_....png
 #   This package requires 3 2-D model fields (or 3-D input to create these):
 #     (1) precipitation rate
-#     (2) vertically-integrated temperature (or saturation specific humidity) 
+#     (2) vertically-averaged temperature or vertically-integrated saturation specific humidity
 #     (3) column water vapor (CWV, or precipitable water vapor)
-#   For further documentation & user options, see comments in convective_transition_diag_model_v1r0.py
-os.system("python "+os.environ["VARCODE"]+"/convective_transition_diag_model_v1r0.py")
+#   For further documentation & user options, see comments in convective_transition_diag_v1r0.py
+os.system("python "+os.environ["VARCODE"]+"/convective_transition_diag_v1r0.py")
 
 # ======================================================================
 #  DO NOT modify: finish html file
