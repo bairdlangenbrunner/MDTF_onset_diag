@@ -699,6 +699,24 @@ def convecTransStats_plot(ret,argsv1,argsv2,*argsv3):
     CWV_BIN_WIDTH_obs,\
     PRECIP_THRESHOLD_obs=convecTransStats_loadAnalyzedData(argsv2)
 
+    # Check whether the detected binned MODEL data is consistent with User-Specified Parameters
+    #  (Not all parameters, just 3)
+    if (CBW!=CWV_BIN_WIDTH):
+        print("==> Caution! The detected binned output has a CWV_BIN_WIDTH value "\
+                +"different from the value specified in convecTransStats_usp_calc.py!")
+    if (PT!=PRECIP_THRESHOLD):
+        print("==> Caution! The detected binned output has a PRECIP_THRESHOLD value "\
+                +"different from the value specified in convecTransStats_usp_calc.py!")
+    if (P0.shape[0]!=NUMBER_OF_REGIONS):
+        print("==> Caution! The detected binned output has a NUMBER_OF_REGIONS "\
+                +"different from the value specified in convecTransStats_usp_calc.py!")
+    if (CBW!=CWV_BIN_WIDTH or PT!=PRECIP_THRESHOLD or P0.shape[0]!=NUMBER_OF_REGIONS):
+        print("Caution! The detected binned output is inconsistent with  "\
+                +"User-Specified Parameter(s) defined in convecTransStats_usp_calc.py!")
+        print("   Please double-check convecTransStats_usp_calc.py, "\
+                +"or if the required MODEL output exist, set BIN_ANYWAY=True "\
+                +"in convecTransStats_usp_calc.py!")
+
     ### Process/Plot binned OBS data
     #  if the binned OBS data exists, checking by P0_obs==[]
     if (P0_obs!=[]):
