@@ -575,9 +575,9 @@ def convecTransStats_calc_model(REGION,*argsv):
     print("   Binned results saved as "+BIN_OUTPUT_DIR+"/"+BIN_OUTPUT_FILENAME+".nc!")
 
     if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):    
-        return cwv_bin_center,tave_bin_center,P0,P1,P2,PE,Q0,Q1,[],[]
+        return cwv_bin_center,tave_bin_center,P0,P1,P2,PE,Q0,Q1,CWV_BIN_WIDTH,PRECIP_THRESHOLD
     elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
-        return cwv_bin_center,qsat_int_bin_center,P0,P1,P2,PE,[],[],[],[]
+        return cwv_bin_center,qsat_int_bin_center,P0,P1,P2,PE,[],[],CWV_BIN_WIDTH,PRECIP_THRESHOLD
 
 # ======================================================================
 # convecTransStats_loadAnalyzedData
@@ -637,7 +637,7 @@ def convecTransStats_loadAnalyzedData(*argsv):
         #  user-specified parameters are consistent with existing data
         return cwv_bin_center,temp_bin_center,P0,P1,P2,PE,Q0,Q1,CWV_BIN_WIDTH,PRECIP_THRESHOLD
 
-    else: # If the binned model/obs data does not exist    
+    else: # If the binned model/obs data does not exist (in practive, for obs data only)   
         return [],[],[],[],[],[],[],[],[],[]
 
 # ======================================================================
