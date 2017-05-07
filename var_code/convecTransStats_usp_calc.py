@@ -52,7 +52,7 @@ BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=1
 # Directory & Filename for saving binned results (netCDF4)
 #  tave or qsat_int will be appended to BIN_OUTPUT_FILENAME
 BIN_OUTPUT_DIR=os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]
-BIN_OUTPUT_FILENAME=os.environ["CASENAME"]+".convect_transit_diag"
+BIN_OUTPUT_FILENAME=os.environ["CASENAME"]+".convecTransStat"
 
 # ======================================================================
 # Re-do binning even if binned data file detected (default: False)
