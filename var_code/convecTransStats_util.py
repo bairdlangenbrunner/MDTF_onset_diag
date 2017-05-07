@@ -25,6 +25,7 @@ from scipy.interpolate import NearestNDInterpolator
 from netCDF4 import Dataset
 import matplotlib.pyplot as mp
 import matplotlib.cm as cm
+import networkx
 
 # ======================================================================
 # convecTransStats_binTave
@@ -271,7 +272,7 @@ def convecTransStats_calcTaveQsatInt(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
         # Save 1000-200mb Column Average Temperature as tave
         tave_output_filename=PREPROCESSING_OUTPUT_DIR+"/"+ta_netcdf_filename.split('/')[-1].replace(TA_VAR,TAVE_VAR)
         tave_output_netcdf=Dataset(tave_output_filename,"w",format="NETCDF4")
-        tave_output_description=str(p_lev_bottom)+"-"+str(p_lev_top)+" hPa "\
+        tave_output_netcdf.description=str(p_lev_bottom)+"-"+str(p_lev_top)+" hPa "\
                                     +"Mass-Weighted Column Average Temperature for "+MODEL
         tave_output_netcdf.source="Convective Onset Statistics Diagnostic Package \
         - as part of the NOAA Model Diagnostic Task Force (MDTF) effort"
@@ -302,7 +303,7 @@ def convecTransStats_calcTaveQsatInt(ta_netcdf_filename,TA_VAR,PRES_VAR,MODEL,\
         # Save 1000-200mb Column-integrated Saturation Specific Humidity as qsat_int
         qsat_int_output_filename=PREPROCESSING_OUTPUT_DIR+"/"+ta_netcdf_filename.split('/')[-1].replace(TA_VAR,QSAT_INT_VAR)
         qsat_int_output_netcdf=Dataset(qsat_int_output_filename,"w",format="NETCDF4")
-        qsat_int_output_description=str(p_lev_bottom)+"-"+str(p_lev_top)+" hPa "\
+        qsat_int_output_netcdf.description=str(p_lev_bottom)+"-"+str(p_lev_top)+" hPa "\
                                     +"Column-integrated Saturation Specific Humidity for "+MODEL
         qsat_int_output_netcdf.source="Convective Onset Statistics Diagnostic Package \
         - as part of the NOAA Model Diagnostic Task Force (MDTF) effort"
@@ -508,9 +509,10 @@ def convecTransStats_calc_model(REGION,*argsv):
     # Save Binning Results
     bin_output_netcdf=Dataset(BIN_OUTPUT_DIR+"/"+BIN_OUTPUT_FILENAME+".nc","w",format="NETCDF4")
             
-    bin_output_description="Convective Onset Statistics for "+MODEL
+    bin_output_netcdf.description="Convective Onset Statistics for "+MODEL
     bin_output_netcdf.source="Convective Onset Statistics Diagnostic Package \
     - as part of the NOAA Model Diagnostic Task Force (MDTF) effort"
+    bin_output_netcdf.PRECIP_THRESHOLD=PRECIP_THRESHOLD
 
     region=bin_output_netcdf.createDimension("region",NUMBER_OF_REGIONS)
     reg=bin_output_netcdf.createVariable("region",numpy.float64,("region",))
@@ -573,9 +575,9 @@ def convecTransStats_calc_model(REGION,*argsv):
     print("   Binned results saved as "+BIN_OUTPUT_DIR+"/"+BIN_OUTPUT_FILENAME+".nc!")
 
     if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):    
-        return cwv_bin_center,tave_bin_center,P0,P1,P2,PE,Q0,Q1
+        return cwv_bin_center,tave_bin_center,P0,P1,P2,PE,Q0,Q1,[],[]
     elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
-        return cwv_bin_center,qsat_int_bin_center,P0,P1,P2,PE,[],[]
+        return cwv_bin_center,qsat_int_bin_center,P0,P1,P2,PE,[],[],[],[]
 
 # ======================================================================
 # convecTransStats_loadAnalyzedData
@@ -588,36 +590,66 @@ def convecTransStats_loadAnalyzedData(*argsv):
     TAVE_VAR,\
     QSAT_INT_VAR,\
     BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=argsv[0]
-    bin_output_netcdf=Dataset(bin_output_list[0],"r")
+    
+    if (len(bin_output_list)!=0):
 
-    cwv_bin_center=numpy.asarray(bin_output_netcdf.variables["cwv"][:],dtype="float")
-    P0=numpy.asarray(bin_output_netcdf.variables["P0"][:,:,:],dtype="float")
-    P1=numpy.asarray(bin_output_netcdf.variables["P1"][:,:,:],dtype="float")
-    P2=numpy.asarray(bin_output_netcdf.variables["P2"][:,:,:],dtype="float")
-    PE=numpy.asarray(bin_output_netcdf.variables["PE"][:,:,:],dtype="float")
+        bin_output_filename=bin_output_list[0]    
+        if bin_output_filename.split('.')[-1]=='nc':
+            bin_output_netcdf=Dataset(bin_output_filename,"r")
 
-    if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):
-        temp_bin_center=numpy.asarray(bin_output_netcdf.variables[TAVE_VAR][:],dtype="float")
-        Q0=numpy.asarray(bin_output_netcdf.variables["Q0"][:,:],dtype="float")
-        Q1=numpy.asarray(bin_output_netcdf.variables["Q1"][:,:],dtype="float") 
-    elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
-        temp_bin_center=numpy.asarray(bin_output_netcdf.variables[QSAT_INT_VAR][:],dtype="float")
-        Q0=[]
-        Q1=[]
+            cwv_bin_center=numpy.asarray(bin_output_netcdf.variables["cwv"][:],dtype="float")
+            P0=numpy.asarray(bin_output_netcdf.variables["P0"][:,:,:],dtype="float")
+            P1=numpy.asarray(bin_output_netcdf.variables["P1"][:,:,:],dtype="float")
+            P2=numpy.asarray(bin_output_netcdf.variables["P2"][:,:,:],dtype="float")
+            PE=numpy.asarray(bin_output_netcdf.variables["PE"][:,:,:],dtype="float")
+            PRECIP_THRESHOLD=bin_output_netcdf.getncattr("PRECIP_THRESHOLD")
+            if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):
+                temp_bin_center=numpy.asarray(bin_output_netcdf.variables[TAVE_VAR][:],dtype="float")
+                Q0=numpy.asarray(bin_output_netcdf.variables["Q0"][:,:],dtype="float")
+                Q1=numpy.asarray(bin_output_netcdf.variables["Q1"][:,:],dtype="float") 
+            elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
+                temp_bin_center=numpy.asarray(bin_output_netcdf.variables[QSAT_INT_VAR][:],dtype="float")
+                Q0=[]
+                Q1=[]
+            CWV_BIN_WIDTH=cwv_bin_center[1]-cwv_bin_center[0]
+            bin_output_netcdf.close()
+            
+        elif bin_output_filename.split('.')[-1]=='mat':
+            matfile=scipy.io.loadmat(bin_output_filename)
 
-    bin_output_netcdf.close()
+            cwv_bin_center=matfile['cwv']
+            P0=matfile['P0'].astype(float)
+            P1=matfile['P1']
+            P2=matfile['P2']
+            PE=matfile['PE'].astype(float)
+            PRECIP_THRESHOLD=matfile['PRECIP_THRESHOLD'][0,0]
+            if BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1:
+                temp_bin_center=matfile[TAVE_VAR]
+                Q0=matfile['Q0'].astype(float)
+                Q1=matfile['Q1']
+            elif BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2:
+                temp_bin_center=matfile[QSAT_INT_VAR]
+                Q0=[]
+                Q1=[]
+            CWV_BIN_WIDTH=cwv_bin_center[1][0]-cwv_bin_center[0][0]
+    
+        # Return CWV_BIN_WIDTH & PRECIP_THRESHOLD to make sure that
+        #  user-specified parameters are consistent with existing data
+        return cwv_bin_center,temp_bin_center,P0,P1,P2,PE,Q0,Q1,CWV_BIN_WIDTH,PRECIP_THRESHOLD
 
-    return cwv_bin_center,temp_bin_center,P0,P1,P2,PE,Q0,Q1
+    else: # If the binned model/obs data does not exist    
+        return [],[],[],[],[],[],[],[],[],[]
 
 # ======================================================================
 # convecTransStats_plot
 #  takes output from convecTransStats_loadAnalyzedData and saves the figure as a .png file
 
-def convecTransStats_plot(ret,argsv2,*argsv1):
+def convecTransStats_plot(ret,argsv1,argsv2,*argsv3):
 
-    print("Plotting..."),
+    print("Plotting...")
 
-
+    # Load binned model data with parameters
+    #  CBW:CWV_BIN_WIDTH, PT:PRECIP_THRESHOLD
     cwv_bin_center,\
     temp_bin_center,\
     P0,\
@@ -625,8 +657,18 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
     P2,\
     PE,\
     Q0,\
-    Q1=ret
+    Q1,\
+    CBW,\
+    PT=ret
     
+    # Load plotting parameters from convecTransStats_usp_plot.py
+    fig_params=argsv1
+
+    # Load parameters from convecTransStats_usp_calc.py
+    #  Checking CWV_BIN_WIDTH & PRECIP_THRESHOLD 
+    #  against CBW & PT guarantees the detected binned result
+    #  is consistent with parameters defined in 
+    #  convecTransStats_usp_calc.py
     CWV_BIN_WIDTH,\
     PDF_THRESHOLD,\
     CWV_RANGE_THRESHOLD,\
@@ -637,9 +679,211 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
     BULK_TROPOSPHERIC_TEMPERATURE_MEASURE,\
     PRECIP_THRESHOLD,\
     FIG_OUTPUT_DIR,\
-    FIG_OUTPUT_FILENAME=argsv1[0]
+    FIG_OUTPUT_FILENAME,\
+    OBS,\
+    REGION_STR_OBS,\
+    FIG_OBS_DIR,\
+    FIG_OBS_FILENAME,\
+    USE_SAME_COLOR_MAP,\
+    OVERLAY_OBS_ON_TOP_OF_MODEL_FIG=argsv3[0]
 
-    fig_params=argsv2
+    # Load binned OBS data (default: R2TMIv7)
+    cwv_bin_center_obs,\
+    temp_bin_center_obs,\
+    P0_obs,\
+    P1_obs,\
+    P2_obs,\
+    PE_obs,\
+    Q0_obs,\
+    Q1_obs,\
+    CWV_BIN_WIDTH_obs,\
+    PRECIP_THRESHOLD_obs=convecTransStats_loadAnalyzedData(argsv2)
+
+    ### Process/Plot binned OBS data
+    #  if the binned OBS data exists, checking by P0_obs==[]
+    if (P0_obs!=[]):
+        # Post-binning Processing before Plotting
+        P0_obs[P0_obs==0.0]=numpy.nan
+        P_obs=P1_obs/P0_obs
+        CP_obs=PE_obs/P0_obs
+        PDF_obs=numpy.zeros(P0_obs.shape)
+        for reg in numpy.arange(P0_obs.shape[0]):
+            PDF_obs[reg,:,:]=P0_obs[reg,:,:]/numpy.nansum(P0_obs[reg,:,:])/CWV_BIN_WIDTH_obs
+        # Bins with PDF>PDF_THRESHOLD
+        pdf_gt_th_obs=numpy.zeros(PDF_obs.shape)
+        with numpy.errstate(invalid="ignore"):
+            pdf_gt_th_obs[PDF_obs>PDF_THRESHOLD]=1
+
+        # Indicator of (temp,reg) with wide CWV range
+        t_reg_I_obs=(numpy.squeeze(numpy.sum(pdf_gt_th_obs,axis=1))*CWV_BIN_WIDTH_obs>CWV_RANGE_THRESHOLD)
+
+        ### Connected Component Section
+        # The CWV_RANGE_THRESHOLD-Criterion must be satisfied by a connected component
+        #  Default: off for MODEL/on for OBS
+        # Fot R2TMIv7 (OBS) this doesn't make much difference
+        #  But when models behave "funny" one may miss by turning on this section
+        # For fitting procedure (finding critical CWV at which the precip picks up)
+        #  Default: on
+        for reg in numpy.arange(P0_obs.shape[0]):
+            for Tidx in numpy.arange(P0_obs.shape[2]):
+                if t_reg_I_obs[reg,Tidx]:
+                    G=networkx.DiGraph()
+                    for cwv_idx in numpy.arange(pdf_gt_th_obs.shape[1]-1):
+                        if (pdf_gt_th_obs[reg,cwv_idx,Tidx]>0 and pdf_gt_th_obs[reg,cwv_idx+1,Tidx]>0):
+                            G.add_path([cwv_idx,cwv_idx+1])
+                    largest = max(networkx.weakly_connected_component_subgraphs(G),key=len)
+                    bcc=largest.nodes() # Biggest Connected Component
+                    if (sum(pdf_gt_th_obs[reg,bcc,Tidx])*CWV_BIN_WIDTH_obs>CWV_RANGE_THRESHOLD):
+                        pdf_gt_th_obs[reg,:,Tidx]=0
+                        pdf_gt_th_obs[reg,bcc,Tidx]=1
+                        t_reg_I_obs[reg,Tidx]=True
+                    else:
+                        pdf_gt_th_obs[reg,:,Tidx]=0
+                        t_reg_I_obs[reg,Tidx]=False
+        ### End of Connected Component Section    
+
+        # Copy P1, CP into p1, cp for (temp,reg) with "wide CWV range" & "large PDF"
+        p1_obs=numpy.zeros(P1_obs.shape)
+        cp_obs=numpy.zeros(CP_obs.shape)
+        for reg in numpy.arange(P1_obs.shape[0]):
+            for Tidx in numpy.arange(P1_obs.shape[2]):
+                if t_reg_I_obs[reg,Tidx]:
+                    p1_obs[reg,:,Tidx]=P_obs[reg,:,Tidx]
+                    cp_obs[reg,:,Tidx]=CP_obs[reg,:,Tidx]
+        p1_obs[pdf_gt_th_obs==0]=numpy.nan
+        cp_obs[pdf_gt_th_obs==0]=numpy.nan
+        pdf_obs=PDF_obs
+
+        for reg in numpy.arange(P1_obs.shape[0]):
+            for Tidx in numpy.arange(P1_obs.shape[2]):
+                if (t_reg_I_obs[reg,Tidx] and cp_obs[reg,:,Tidx][cp_obs[reg,:,Tidx]>=0.0].size>0):
+                    if (numpy.max(cp_obs[reg,:,Tidx][cp_obs[reg,:,Tidx]>=0])<CP_THRESHOLD):
+                        t_reg_I_obs[reg,Tidx]=False
+                else:
+                    t_reg_I_obs[reg,Tidx]=False
+                    
+        for reg in numpy.arange(P1_obs.shape[0]):
+            for Tidx in numpy.arange(P1_obs.shape[2]):
+                if (~t_reg_I_obs[reg,Tidx]):
+                    p1_obs[reg,:,Tidx]=numpy.nan
+                    cp_obs[reg,:,Tidx]=numpy.nan
+                    pdf_obs[reg,:,Tidx]=numpy.nan
+        pdf_pe_obs=pdf_obs*cp_obs
+
+        # Temperature range for plotting
+        TEMP_MIN_obs=numpy.where(numpy.sum(t_reg_I_obs,axis=0)>=2)[0][0]
+        TEMP_MAX_obs=numpy.where(numpy.sum(t_reg_I_obs,axis=0)>=2)[0][-1]
+        # ======================================================================
+        # ======================Start Plot OBS Binned Data======================
+        # ======================================================================
+        NoC=TEMP_MAX_obs-TEMP_MIN_obs+1 # Number of Colors
+        scatter_colors = cm.jet(numpy.linspace(0,1,NoC,endpoint=True))
+
+        axes_fontsize,legend_fonsize,marker_size,xtick_pad,figsize1,figsize2 = fig_params['f0'] 
+
+        print("   Plotting OBS Figure..."),
+        # create figure canvas
+        fig_obs = mp.figure(figsize=(figsize1,figsize2))
+
+        for reg in numpy.arange(NUMBER_OF_REGIONS):
+            # create figure 1
+            ax1 = fig_obs.add_subplot(NUMBER_OF_REGIONS,4,1+reg*NUMBER_OF_REGIONS)
+            ax1.set_xlim(fig_params['f1'][0])
+            ax1.set_ylim(fig_params['f1'][1])
+            ax1.set_xticks(fig_params['f1'][4])
+            ax1.set_yticks(fig_params['f1'][5])
+            ax1.tick_params(labelsize=axes_fontsize)
+            ax1.tick_params(axis="x", pad=10)
+            for Tidx in numpy.arange(TEMP_MIN_obs,TEMP_MAX_obs+1):
+                if t_reg_I_obs[reg,Tidx]:
+                    if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):
+                        ax1.scatter(cwv_bin_center_obs,p1_obs[reg,:,Tidx],\
+                                    edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN_obs,:],\
+                                    s=marker_size,clip_on=True,zorder=3,\
+                                    label="{:.0f}".format(temp_bin_center_obs[Tidx]))
+                    elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
+                        ax1.scatter(cwv_bin_center_obs,p1_obs[reg,:,Tidx],\
+                                    edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN_obs,:],\
+                                    s=marker_size,clip_on=True,zorder=3,\
+                                    label="{:.1f}".format(temp_bin_center_obs[Tidx]))
+            ax1.set_ylabel(fig_params['f1'][2], fontsize=axes_fontsize)
+            ax1.set_xlabel(fig_params['f1'][3], fontsize=axes_fontsize)
+            ax1.grid()
+            ax1.set_axisbelow(True)
+
+            handles, labels = ax1.get_legend_handles_labels()
+            leg = ax1.legend(handles, labels, fontsize=axes_fontsize, bbox_to_anchor=(0.05,0.95), \
+                            bbox_transform=ax1.transAxes, loc="upper left", borderaxespad=0, labelspacing=0.1, \
+                            fancybox=False,scatterpoints=1,  framealpha=0, borderpad=0, \
+                            handletextpad=0.1, markerscale=1, ncol=1, columnspacing=0.25)
+
+            # create figure 2 (probability pickup)
+            ax2 = fig_obs.add_subplot(NUMBER_OF_REGIONS,4,2+reg*NUMBER_OF_REGIONS)
+            ax2.set_xlim(fig_params['f2'][0])
+            ax2.set_ylim(fig_params['f2'][1])
+            ax2.set_xticks(fig_params['f2'][4])
+            ax2.set_yticks(fig_params['f2'][5])
+            ax2.tick_params(labelsize=axes_fontsize)
+            ax2.tick_params(axis="x", pad=xtick_pad)
+            for Tidx in numpy.arange(TEMP_MIN_obs,TEMP_MAX_obs+1):
+                if t_reg_I_obs[reg,Tidx]:
+                    ax2.scatter(cwv_bin_center_obs,cp_obs[reg,:,Tidx],\
+                                edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN_obs,:],\
+                                s=marker_size,clip_on=True,zorder=3)
+            ax2.set_ylabel(fig_params['f2'][2], fontsize=axes_fontsize)
+            ax2.set_xlabel(fig_params['f2'][3], fontsize=axes_fontsize)
+            ax2.text(0.05, 0.95, OBS, transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
+            ax2.text(0.05, 0.85, REGION_STR_OBS[reg], transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
+            ax2.grid()
+            ax2.set_axisbelow(True)
+
+            # create figure 3 (normalized PDF)
+            ax3 = fig_obs.add_subplot(NUMBER_OF_REGIONS,4,3+reg*NUMBER_OF_REGIONS)
+            ax3.set_yscale("log")
+            ax3.set_xlim(fig_params['f3'][0])
+            ax3.set_ylim(fig_params['f3'][1])
+            ax3.set_xticks(fig_params['f3'][4])
+            ax3.tick_params(labelsize=axes_fontsize)
+            ax3.tick_params(axis="x", pad=xtick_pad)
+            for Tidx in numpy.arange(TEMP_MIN_obs,TEMP_MAX_obs+1):
+                if t_reg_I_obs[reg,Tidx]:
+                    ax3.scatter(cwv_bin_center_obs,PDF_obs[reg,:,Tidx],\
+                                edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN_obs,:],\
+                                s=marker_size,clip_on=True,zorder=3)
+            ax3.set_ylabel(fig_params['f3'][2], fontsize=axes_fontsize)
+            ax3.set_xlabel(fig_params['f3'][3], fontsize=axes_fontsize)
+            ax3.grid()
+            ax3.set_axisbelow(True)
+
+            # create figure 4 (normalized PDF - precipitation)
+            ax4 = fig_obs.add_subplot(NUMBER_OF_REGIONS,4,4+reg*NUMBER_OF_REGIONS)
+            ax4.set_yscale("log")
+            ax4.set_xlim(fig_params['f4'][0])
+            ax4.set_ylim(fig_params['f4'][1])
+            ax4.set_xticks(fig_params['f4'][4])
+            ax4.tick_params(labelsize=axes_fontsize)
+            ax4.tick_params(axis="x", pad=xtick_pad)
+            for Tidx in numpy.arange(TEMP_MIN_obs,TEMP_MAX_obs+1):
+                if t_reg_I_obs[reg,Tidx]:
+                    ax4.scatter(cwv_bin_center_obs,pdf_pe_obs[reg,:,Tidx],\
+                                edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN_obs,:],\
+                                s=marker_size,clip_on=True,zorder=3)
+            ax4.set_ylabel(fig_params['f4'][2], fontsize=axes_fontsize)
+            ax4.set_xlabel(fig_params['f4'][3], fontsize=axes_fontsize)
+            ax4.text(0.05, 0.95, "Precip > "+str(PRECIP_THRESHOLD_obs)+" mm hr$^-$$^1$" , transform=ax4.transAxes, fontsize=12, verticalalignment="top")
+            ax4.grid()
+            ax4.set_axisbelow(True)
+
+        # set layout to tight (so that space between figures is minimized)
+        fig_obs.tight_layout()
+        fig_obs.savefig(FIG_OBS_DIR+"/"+FIG_OBS_FILENAME, bbox_inches="tight", bbox_extra_artists=(leg,))
+        
+        print("...Completed!")
+        print("      OBS Figure saved as "+FIG_OBS_DIR+"/"+FIG_OBS_FILENAME+"!")
+        # ======================================================================
+        # =======================End Plot OBS Binned Data=======================
+        # ======================================================================
+    ### End of Process/Plot binned OBS data    
 
     # Post-binning Processing before Plotting
     P0[P0==0.0]=numpy.nan
@@ -647,14 +891,39 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
     CP=PE/P0
     PDF=numpy.zeros(P0.shape)
     for reg in numpy.arange(P0.shape[0]):
-        PDF[reg,:,:]=P0[reg,:,:]/numpy.nansum(P0[reg,:,:])/CWV_BIN_WIDTH
+        PDF[reg,:,:]=P0[reg,:,:]/numpy.nansum(P0[reg,:,:])/CBW
     # Bins with PDF>PDF_THRESHOLD
     pdf_gt_th=numpy.zeros(PDF.shape)
     with numpy.errstate(invalid="ignore"):
         pdf_gt_th[PDF>PDF_THRESHOLD]=1
 
     # Indicator of (temp,reg) with wide CWV range
-    t_reg_I=(numpy.squeeze(numpy.sum(pdf_gt_th,axis=1))>CWV_RANGE_THRESHOLD)
+    t_reg_I=(numpy.squeeze(numpy.sum(pdf_gt_th,axis=1))*CBW>CWV_RANGE_THRESHOLD)
+
+    ### Connected Component Section
+    # The CWV_RANGE_THRESHOLD-Criterion must be satisfied by a connected component
+    #  Default: off for MODEL/on for OBS
+    # Fot R2TMIv7 (OBS) this doesn't make much difference
+    #  But when models behave "funny" one may miss by turning on this section
+    # For fitting procedure (finding critical CWV at which the precip picks up)
+    #  Default: on
+#    for reg in numpy.arange(P0.shape[0]):
+#        for Tidx in numpy.arange(P0.shape[2]):
+#            if t_reg_I[reg,Tidx]:
+#                G=networkx.DiGraph()
+#                for cwv_idx in numpy.arange(pdf_gt_th.shape[1]-1):
+#                    if (pdf_gt_th[reg,cwv_idx,Tidx]>0 and pdf_gt_th[reg,cwv_idx+1,Tidx]>0):
+#                        G.add_path([cwv_idx,cwv_idx+1])
+#                largest = max(networkx.weakly_connected_component_subgraphs(G),key=len)
+#                bcc=largest.nodes() # Biggest Connected Component
+#                if (sum(pdf_gt_th[reg,bcc,Tidx])*CBW>CWV_RANGE_THRESHOLD):
+#                    pdf_gt_th[reg,:,Tidx]=0
+#                    pdf_gt_th[reg,bcc,Tidx]=1
+#                    t_reg_I[reg,Tidx]=True
+#                else:
+#                    pdf_gt_th[reg,:,Tidx]=0
+#                    t_reg_I[reg,Tidx]=False
+    ### End of Connected Component Section    
 
     # Copy P1, CP into p1, cp for (temp,reg) with "wide CWV range" & "large PDF"
     p1=numpy.zeros(P1.shape)
@@ -687,14 +956,20 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
     # Temperature range for plotting
     TEMP_MIN=numpy.where(numpy.sum(t_reg_I,axis=0)>=2)[0][0]
     TEMP_MAX=numpy.where(numpy.sum(t_reg_I,axis=0)>=2)[0][-1]
+    # Use OBS to set colormap (but if they don't exist or users don't want to...)
+    if (P0_obs==[] or USE_SAME_COLOR_MAP==False): 
+        TEMP_MIN_obs=TEMP_MIN
+        TEMP_MAX_obs=TEMP_MAX
 
-    ##### Plot #####
-    # create color map
-    # choose from maps here:
-    # http://matplotlib.org/examples/color/colormaps_reference.html
-    scatter_colors = cm.jet(numpy.linspace(0,1,TEMP_MAX-TEMP_MIN+1,endpoint=True))
+    # ======================================================================
+    # =====================Start Plot MODEL Binned Data=====================
+    # ======================================================================
+    NoC=TEMP_MAX_obs-TEMP_MIN_obs+1 # Number of Colors
+    scatter_colors = cm.jet(numpy.linspace(0,1,NoC,endpoint=True))
 
     axes_fontsize,legend_fonsize,marker_size,xtick_pad,figsize1,figsize2 = fig_params['f0'] 
+
+    print("   Plotting MODEL Figure..."),
 
     # create figure canvas
     fig = mp.figure(figsize=(figsize1,figsize2))
@@ -712,14 +987,20 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
             if t_reg_I[reg,Tidx]:
                 if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1):
                     ax1.scatter(cwv_bin_center,p1[reg,:,Tidx],\
-                                edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
+                                edgecolor="none",facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
                                 s=marker_size,clip_on=True,zorder=3,\
                                 label="{:.0f}".format(temp_bin_center[Tidx]))
                 elif (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2):
                     ax1.scatter(cwv_bin_center,p1[reg,:,Tidx],\
-                                edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
+                                edgecolor="none",facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
                                 s=marker_size,clip_on=True,zorder=3,\
                                 label="{:.1f}".format(temp_bin_center[Tidx]))
+        for Tidx in numpy.arange(min(TEMP_MIN_obs,TEMP_MIN),max(TEMP_MAX_obs+1,TEMP_MAX+1)):
+            if (OVERLAY_OBS_ON_TOP_OF_MODEL_FIG and \
+                P0_obs!=[] and t_reg_I_obs[reg,Tidx]):
+                ax1.scatter(cwv_bin_center_obs,p1_obs[reg,:,Tidx],\
+                            edgecolor='0.25',facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
+                            s=marker_size/5,clip_on=True,zorder=3)
         ax1.set_ylabel(fig_params['f1'][2], fontsize=axes_fontsize)
         ax1.set_xlabel(fig_params['f1'][3], fontsize=axes_fontsize)
         ax1.grid()
@@ -739,14 +1020,18 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
         ax2.set_yticks(fig_params['f2'][5])
         ax2.tick_params(labelsize=axes_fontsize)
         ax2.tick_params(axis="x", pad=xtick_pad)
- 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax2.scatter(cwv_bin_center,cp[reg,:,Tidx],\
-                            edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
+                            edgecolor="none",facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
                             s=marker_size,clip_on=True,zorder=3)
+        for Tidx in numpy.arange(min(TEMP_MIN_obs,TEMP_MIN),max(TEMP_MAX_obs+1,TEMP_MAX+1)):
+            if (OVERLAY_OBS_ON_TOP_OF_MODEL_FIG and \
+                P0_obs!=[] and t_reg_I_obs[reg,Tidx]):
+                ax2.scatter(cwv_bin_center_obs,cp_obs[reg,:,Tidx],\
+                            edgecolor='0.25',facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
+                            s=marker_size/5,clip_on=True,zorder=3)
         ax2.set_ylabel(fig_params['f2'][2], fontsize=axes_fontsize)
-
         ax2.set_xlabel(fig_params['f2'][3], fontsize=axes_fontsize)
         ax2.text(0.05, 0.95, MODEL, transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
         ax2.text(0.05, 0.85, REGION_STR[reg], transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
@@ -761,16 +1046,19 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
         ax3.set_xticks(fig_params['f3'][4])
         ax3.tick_params(labelsize=axes_fontsize)
         ax3.tick_params(axis="x", pad=xtick_pad)
- 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax3.scatter(cwv_bin_center,PDF[reg,:,Tidx],\
-                            edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
+                            edgecolor="none",facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
                             s=marker_size,clip_on=True,zorder=3)
+        for Tidx in numpy.arange(min(TEMP_MIN_obs,TEMP_MIN),max(TEMP_MAX_obs+1,TEMP_MAX+1)):
+            if (OVERLAY_OBS_ON_TOP_OF_MODEL_FIG and \
+                P0_obs!=[] and t_reg_I_obs[reg,Tidx]):
+                ax3.scatter(cwv_bin_center_obs,PDF_obs[reg,:,Tidx],\
+                            edgecolor='0.25',facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
+                            s=marker_size/5,clip_on=True,zorder=3)
         ax3.set_ylabel(fig_params['f3'][2], fontsize=axes_fontsize)
-
         ax3.set_xlabel(fig_params['f3'][3], fontsize=axes_fontsize)
- 
         ax3.grid()
         ax3.set_axisbelow(True)
 
@@ -782,16 +1070,20 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
         ax4.set_xticks(fig_params['f4'][4])
         ax4.tick_params(labelsize=axes_fontsize)
         ax4.tick_params(axis="x", pad=xtick_pad)
- 
         for Tidx in numpy.arange(TEMP_MIN,TEMP_MAX+1):
             if t_reg_I[reg,Tidx]:
                 ax4.scatter(cwv_bin_center,pdf_pe[reg,:,Tidx],\
-                            edgecolor="none",facecolor=scatter_colors[Tidx-TEMP_MIN,:],\
+                            edgecolor="none",facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
                             s=marker_size,clip_on=True,zorder=3)
+        for Tidx in numpy.arange(min(TEMP_MIN_obs,TEMP_MIN),max(TEMP_MAX_obs+1,TEMP_MAX+1)):
+            if (OVERLAY_OBS_ON_TOP_OF_MODEL_FIG and \
+                P0_obs!=[] and t_reg_I_obs[reg,Tidx]):
+                ax4.scatter(cwv_bin_center_obs,pdf_pe_obs[reg,:,Tidx],\
+                            edgecolor='0.25',facecolor=scatter_colors[(Tidx-TEMP_MIN)%NoC,:],\
+                            s=marker_size/5,clip_on=True,zorder=3)
         ax4.set_ylabel(fig_params['f4'][2], fontsize=axes_fontsize)
-
         ax4.set_xlabel(fig_params['f4'][3], fontsize=axes_fontsize)
-        ax4.text(0.05, 0.95, "Precip > "+str(PRECIP_THRESHOLD)+" mm hr$^-$$^1$" , transform=ax4.transAxes, fontsize=12, verticalalignment="top")
+        ax4.text(0.05, 0.95, "Precip > "+str(PT)+" mm hr$^-$$^1$" , transform=ax4.transAxes, fontsize=12, verticalalignment="top")
         ax4.grid()
         ax4.set_axisbelow(True)
 
@@ -800,4 +1092,7 @@ def convecTransStats_plot(ret,argsv2,*argsv1):
     fig.savefig(FIG_OUTPUT_DIR+"/"+FIG_OUTPUT_FILENAME, bbox_inches="tight", bbox_extra_artists=(leg,))
     
     print("...Completed!")
-    print("   Figure saved as "+FIG_OUTPUT_DIR+"/"+FIG_OUTPUT_FILENAME+"!")
+    print("      Figure saved as "+FIG_OUTPUT_DIR+"/"+FIG_OUTPUT_FILENAME+"!")
+    # ======================================================================
+    # ======================End Plot MODEL Binned Data======================
+    # ======================================================================

@@ -165,8 +165,7 @@ data["qsat_int_list"]=sorted(glob.glob(MODEL_OUTPUT_DIR+"/"+os.environ["file_QSA
 #data["tave_list"]=sorted(glob.glob(PREPROCESSING_OUTPUT_DIR+"/"+os.environ["file_TAVE"]))
 #data["qsat_int_list"]=sorted(glob.glob(PREPROCESSING_OUTPUT_DIR+"/"+os.environ["file_QSAT_INT"]))
 
-if (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==1 and len(data["tave_list"])==0) \
-    or (BULK_TROPOSPHERIC_TEMPERATURE_MEASURE==2 and len(data["qsat_int_list"])==0):
+if (len(data["tave_list"])==0 or len(data["qsat_int_list"])==0):
     data["PREPROCESS_TA"]=1
     data["SAVE_TAVE_QSAT_INT"]=1 # default:1 (save pre-processed tave & qsat_int); 0 if no permission
 else:

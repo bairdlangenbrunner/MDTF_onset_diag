@@ -3,6 +3,7 @@
 
 import json
 import os
+import glob
 
 with open(os.environ["VARCODE"]+"/convecTransStats_calc_parameters.json") as outfile:
     bin_data=json.load(outfile)
@@ -13,14 +14,36 @@ with open(os.environ["VARCODE"]+"/convecTransStats_calc_parameters.json") as out
 # Don't plot bins with PDF<PDF_THRESHOLD
 PDF_THRESHOLD=1e-5 # default: 1e-5
 
-# Don't plot tave/qsat_int with narrow cwv range (< CWV_RANGE_THRESHOLD*0.3 mm)
-CWV_RANGE_THRESHOLD=60 # default: 60
+# Don't plot tave/qsat_int with narrow cwv range (< CWV_RANGE_THRESHOLD mm)
+CWV_RANGE_THRESHOLD=18 # default: 18
 
 # Don't plot tave/qsat_int with low conditional probability of precipitation
 CP_THRESHOLD=0.2
 
 FIG_OUTPUT_DIR=bin_data["BIN_OUTPUT_DIR"]
 FIG_OUTPUT_FILENAME=bin_data["BIN_OUTPUT_FILENAME"]+".png"
+
+## Binned data filename & figure directory/filename for OBS (default: R2TMIv7) ##
+OBS="R2+TMIv7" # Appears on the OBS Figure
+REGION_STR_OBS=["WPac","EPac","Atl","Ind"]
+bin_obs_list=sorted(glob.glob(os.environ["VARDATA"]\
+                    +"/convecTransStat_R2TMIv7/convecTransStat_R2TMIv7r1_200206_201405_res="\
+                    +os.environ["RES"]+"_fillNrCWV_"\
+                    +bin_data["TEMP_VAR"]+".nc"))
+FIG_OBS_DIR=os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/obs"
+FIG_OBS_FILENAME="convecTransStat_R2TMIv7r1_200206_201405_res="\
+                  +os.environ["RES"]+"_fillNrCWV_"+bin_data["TEMP_VAR"]+".png"
+
+# Force the OBS & MODEL figures to use the same color map
+#  Will be ignored if binned OBS data does not exist
+# Set to False if COLUMN is defined differently for OBS & MODEL
+USE_SAME_COLOR_MAP=True
+
+# Plot OBS results on top of MODEL results for comparison
+#  Will be ignored if binned OBS data does not exist
+# If REGION MASK and/or COLUMN DEFINITION are changed
+#  set to False unless the corresponding binned OBS data exists
+OVERLAY_OBS_ON_TOP_OF_MODEL_FIG=True
 
 ## Plot formatting ##
 
@@ -143,10 +166,19 @@ data["CP_THRESHOLD"]=CP_THRESHOLD
 data["FIG_OUTPUT_DIR"]=FIG_OUTPUT_DIR
 data["FIG_OUTPUT_FILENAME"]=FIG_OUTPUT_FILENAME
 
-data["args3"]=[ bin_data["CWV_BIN_WIDTH"],PDF_THRESHOLD,CWV_RANGE_THRESHOLD,\
+data["FIG_OBS_FILENAME"]=FIG_OBS_FILENAME
+
+data["args3"]=[ bin_obs_list,\
+                bin_data["TAVE_VAR"],\
+                bin_data["QSAT_INT_VAR"],\
+                bin_data["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"] ]
+
+data["args4"]=[ bin_data["CWV_BIN_WIDTH"],PDF_THRESHOLD,CWV_RANGE_THRESHOLD,\
                 CP_THRESHOLD,bin_data["MODEL"],bin_data["REGION_STR"],bin_data["NUMBER_OF_REGIONS"],\
                 bin_data["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"],bin_data["PRECIP_THRESHOLD"],\
-                FIG_OUTPUT_DIR,FIG_OUTPUT_FILENAME ]
+                FIG_OUTPUT_DIR,FIG_OUTPUT_FILENAME,\
+                OBS,REGION_STR_OBS,FIG_OBS_DIR,FIG_OBS_FILENAME,\
+                USE_SAME_COLOR_MAP,OVERLAY_OBS_ON_TOP_OF_MODEL_FIG ]
 
 fig_params={}
 

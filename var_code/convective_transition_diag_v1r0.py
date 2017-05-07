@@ -45,7 +45,6 @@ import numpy
 import glob
 import os
 import json
-from netCDF4 import Dataset
 
 # Import Python functions specific to Convective Transition Diagnostics
 from convecTransStats_util import generate_region_mask
@@ -104,7 +103,7 @@ else: # Binned data file exists & BIN_ANYWAY=False
     print("...Loaded!")
 # ======================================================================
 # Plot binning results & save the figure in wkdir/casename/.../
-convecTransStats_plot(binned_output,plot_data["plot_params"],plot_data["args3"])
+convecTransStats_plot(binned_output,plot_data["plot_params"],plot_data["args3"],plot_data["args4"])
 
 # ======================================================================
 # Create HTML linking to plots.
@@ -117,7 +116,7 @@ if os.environ["CLEAN"] == "1":
     os.system("rm -f "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]+"/"+data["BIN_OUTPUT_FILENAME"]+".nc")
 
 # copy plots of OBS 
-os.system("cp "+os.environ["VARDATA"]+"/R2_TMIv7r1_200206_201405_res="+os.environ["RES"]+"_fillNrCWV_onset_diag_"+bin_data["TEMP_VAR"]+".png "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/obs/")
+#os.system("cp "+os.environ["VARDATA"]+"/R2_TMIv7r1_200206_201405_res="+os.environ["RES"]+"_fillNrCWV_onset_diag_"+bin_data["TEMP_VAR"]+".png "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/obs/")
 
 # write links to html file
 os.system("echo '<TABLE>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
@@ -129,6 +128,7 @@ os.system("echo '<TH ALIGH=LEFT>OBS' >> "+os.environ["WKDIR"]+"/MDTF_"+os.enviro
 os.system("echo '<TR>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
 os.system("echo '<TH ALIGH=LEFT>Tropical Ocean Basins' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
 os.system("echo '<TH ALIGH=CENTER><A HREF=\"casename/"+plot_data["FIG_OUTPUT_FILENAME"]+"\">plot</A>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
-os.system("echo '<TH ALIGH=CENTER><A HREF=\"obs/R2_TMIv7r1_200206_201405_res="+os.environ["RES"]+"_fillNrCWV_onset_diag_"+bin_data["TEMP_VAR"]+".png\">plot</A>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
+#os.system("echo '<TH ALIGH=CENTER><A HREF=\"obs/R2_TMIv7r1_200206_201405_res="+os.environ["RES"]+"_fillNrCWV_onset_diag_"+bin_data["TEMP_VAR"]+".png\">plot</A>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
+os.system("echo '<TH ALIGH=CENTER><A HREF=\"obs/"+plot_data["FIG_OBS_FILENAME"]+"\">plot</A>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
 os.system("echo '<TR>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/variab.html")
 print('...Created!')
