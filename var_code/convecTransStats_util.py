@@ -1053,6 +1053,8 @@ def convecTransStats_plot(ret,argsv1,argsv2,*argsv3):
         ax2.set_xlabel(fig_params['f2'][3], fontsize=axes_fontsize)
         ax2.text(0.05, 0.95, MODEL, transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
         ax2.text(0.05, 0.85, REGION_STR[reg], transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top")
+        if (OVERLAY_OBS_ON_TOP_OF_MODEL_FIG and P0_obs!=[]):
+            ax2.text(0.05, 0.7, OBS, transform=ax2.transAxes, fontsize=12, fontweight="bold", verticalalignment="top", color="0.25")
         ax2.grid()
         ax2.set_axisbelow(True)
 
