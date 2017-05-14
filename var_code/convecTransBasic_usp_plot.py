@@ -1,11 +1,14 @@
-###### This is the file that creates the parameters 
-##### for use by the plotting script.
-
+# ======================================================================
+# convecTransBasic_usp_plot.py
+#
+#   Called by convecTransBasic.py
+#    Provides User-Specified Parameters for Plotting
+#
 import json
 import os
 import glob
 
-with open(os.environ["VARCODE"]+"/convecTransStats_calc_parameters.json") as outfile:
+with open(os.environ["VARCODE"]+"/convecTransBasic_calc_parameters.json") as outfile:
     bin_data=json.load(outfile)
     
 # ======================================================================
@@ -18,20 +21,20 @@ PDF_THRESHOLD=1e-5 # default: 1e-5
 CWV_RANGE_THRESHOLD=18 # default: 18
 
 # Don't plot tave/qsat_int with low conditional probability of precipitation
-CP_THRESHOLD=0.2
+CP_THRESHOLD=0.4
 
 FIG_OUTPUT_DIR=bin_data["BIN_OUTPUT_DIR"]
 FIG_OUTPUT_FILENAME=bin_data["BIN_OUTPUT_FILENAME"]+".png"
 
 ## Binned data filename & figure directory/filename for OBS (default: R2TMIv7) ##
-OBS="R2+TMIv7" # Appears on the OBS Figure
+OBS="R2+TMIv7" # will show up in the MODEL figure
 REGION_STR_OBS=["WPac","EPac","Atl","Ind"]
 bin_obs_list=sorted(glob.glob(os.environ["VARDATA"]\
-                    +"/convecTransStat_R2TMIv7/convecTransStat_R2TMIv7r1_200206_201405_res="\
+                    +"/convecTransDiag/convecTransBasic_R2TMIv7r1_200206_201405_res="\
                     +os.environ["RES"]+"_fillNrCWV_"\
                     +bin_data["TEMP_VAR"]+".nc"))
 FIG_OBS_DIR=os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/obs"
-FIG_OBS_FILENAME="convecTransStat_R2TMIv7r1_200206_201405_res="\
+FIG_OBS_FILENAME="convecTransBasic_R2TMIv7r1_200206_201405_res="\
                   +os.environ["RES"]+"_fillNrCWV_"+bin_data["TEMP_VAR"]+".png"
 
 # Force the OBS & MODEL figures to use the same color map
@@ -80,8 +83,8 @@ ylim1['f1']=0
 ylim2['f1']=8
 
 ### Enter labels as strings; Latex mathtype is allowed within $...$ ##
-xlabel['f1']="Precip (mm hr$^-$$^1$)"
-ylabel['f1']="Water Vapor (mm)"
+xlabel['f1']="CWV (mm)"
+ylabel['f1']="Precip (mm hr$^-$$^1$)"
 
 ### Enter ticks as lists ##
 ## Note: this option overrides axes limit options above ##
@@ -100,8 +103,8 @@ ylim1['f2']=0
 ylim2['f2']=1
 
 ### Enter labels as strings; Latex mathtype is allowed within $...$ ##
-xlabel['f2']="Probability of Precip"
-ylabel['f2']="Water Vapor"
+xlabel['f2']="CWV (mm)"
+ylabel['f2']="Probability of Precip"
 
 ### Enter ticks as lists ##
 ## Note: this option overrides axes limit options above ##
@@ -119,8 +122,8 @@ ylim1['f3']=1e-5
 ylim2['f3']=5e-2
 
 ### Enter labels as strings; Latex mathtype is allowed within $...$ ##
-xlabel['f3']="PDF (mm$^-$$^1$)"
-ylabel['f3']="CWV (mm)"
+xlabel['f3']="CWV (mm)"
+ylabel['f3']="PDF (mm$^-$$^1$)"
 
 ### Enter ticks as lists ##
 ## Note: this option overrides axes limit options above ##
@@ -138,8 +141,8 @@ ylim1['f4']=1e-5
 ylim2['f4']=5e-2
 
 ### Enter labels as strings; Latex mathtype is allowed within $...$ ##
-xlabel['f4']="PDF (mm$^-$$^1$)"
-ylabel['f4']="CWV (mm)"
+xlabel['f4']="CWV (mm)"
+ylabel['f4']="PDF (mm$^-$$^1$)"
 
 ### Enter ticks as lists ##
 ## Note: this option overrides axes limit options above ##
@@ -177,7 +180,7 @@ data["args4"]=[ bin_data["CWV_BIN_WIDTH"],PDF_THRESHOLD,CWV_RANGE_THRESHOLD,\
                 CP_THRESHOLD,bin_data["MODEL"],bin_data["REGION_STR"],bin_data["NUMBER_OF_REGIONS"],\
                 bin_data["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"],bin_data["PRECIP_THRESHOLD"],\
                 FIG_OUTPUT_DIR,FIG_OUTPUT_FILENAME,\
-                OBS,REGION_STR_OBS,FIG_OBS_DIR,FIG_OBS_FILENAME,\
+                OBS,os.environ["RES"],REGION_STR_OBS,FIG_OBS_DIR,FIG_OBS_FILENAME,\
                 USE_SAME_COLOR_MAP,OVERLAY_OBS_ON_TOP_OF_MODEL_FIG ]
 
 fig_params={}
@@ -189,5 +192,5 @@ for i in ['f1','f2','f3','f4']:
                 
 data["plot_params"]=fig_params
 
-with open(os.environ["VARCODE"]+"/convecTransStats_plot_parameters.json", "w") as outfile:
+with open(os.environ["VARCODE"]+"/convecTransBasic_plot_parameters.json", "w") as outfile:
     json.dump(data, outfile)

@@ -1,10 +1,12 @@
-###### This is the file that creates the parameters 
-##### for use by the binning and plotting scripts.
-
+# ======================================================================
+# convecTransBasic_usp_calc.py
+#
+#   Called by convecTransBasic.py
+#    Provides User-Specified Parameters for Binning and Plotting
+#
 import json
 import os
 import glob
-data={}
 
 # ======================================================================
 # START USER SPECIFIED SECTION
@@ -23,8 +25,8 @@ LON_VAR=os.environ["lon_var"]
 
 # ======================================================================
 # Region mask directory & filename
-REGION_MASK_DIR=os.environ["VARDATA"]
-REGION_MASK_FILENAME="region_0.25x0.25_GOP2.5deg.mat"
+REGION_MASK_DIR=os.environ["VARDATA"]+"/convecTransDiag"
+REGION_MASK_FILENAME="region_0.25x0.25_costal2.5degExcluded.mat"
 # Number of regions
 #  Use grids with 1<=region<=NUMBER_OF_REGIONS in the mask
 NUMBER_OF_REGIONS=4 # default: 4
@@ -46,13 +48,13 @@ QSAT_INT_VAR=os.environ["QSAT_INT_var"]
 #  Default: 1000 (use smaller numbers for limited memory)
 time_idx_delta=1000
 # Use 1:tave, or 2:qsat_int as Bulk Tropospheric Temperature Measure 
-BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=1
+BULK_TROPOSPHERIC_TEMPERATURE_MEASURE=int(os.environ["BULK_TROPOSPHERIC_TEMPERATURE_MEASURE"])
 
 # ======================================================================
 # Directory & Filename for saving binned results (netCDF4)
 #  tave or qsat_int will be appended to BIN_OUTPUT_FILENAME
 BIN_OUTPUT_DIR=os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+"/"+os.environ["CASENAME"]
-BIN_OUTPUT_FILENAME=os.environ["CASENAME"]+".convecTransStat"
+BIN_OUTPUT_FILENAME=os.environ["CASENAME"]+".convecTransBasic"
 
 # ======================================================================
 # Re-do binning even if binned data file detected (default: False)
@@ -99,6 +101,7 @@ PRECIP_THRESHOLD=0.25
 # DO NOT MODIFY CODE BELOW UNLESS
 # YOU KNOW WHAT YOU ARE DOING
 # ======================================================================
+data={}
 
 data["MODEL"]=MODEL
 data["MODEL_OUTPUT_DIR"]=MODEL_OUTPUT_DIR
@@ -216,5 +219,5 @@ TAVE_VAR,\
 QSAT_INT_VAR,\
 BULK_TROPOSPHERIC_TEMPERATURE_MEASURE ]
 
-with open(os.environ["VARCODE"]+"/convecTransStats_calc_parameters.json", "w") as outfile:
+with open(os.environ["VARCODE"]+"/convecTransBasic_calc_parameters.json", "w") as outfile:
     json.dump(data, outfile)

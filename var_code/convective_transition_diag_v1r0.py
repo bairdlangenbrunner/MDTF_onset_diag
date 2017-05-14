@@ -9,11 +9,13 @@
 #   PI: J. David Neelin (UCLA)
 #
 #   Currently consists of following functionalities:
-#    (1) Convective Transition Statistics (convecTransStats.py)
-#    *(2) Convective Transition Thermodynamic Critical (convecTransThermoCritic.py)
+#    (1) Convective Transition Basic Statistics (convecTransBasic.py)
+#    (2) Convective Transition Critical Collapse (convecTransCriticalCollape.py)
 #    *(3) Moisture Precipitation Joint Probability Density Function (cwvPrecipJPDF.py)
-#    *(4) Moisture Precipitation Joint Probability Density Function (supCriticPrecipProb.py)
+#    *(4) Super Critical Precipitation Probability (supCriticPrecipProb.py)
 #    More on the way...(* under development)
+#
+#   Reference: Kuo et al. (201X)
 #
 # COPYLEFT Agreement TBD
 # ======================================================================
@@ -22,19 +24,22 @@ import os
 
 ##### Functionalities in Convective Transition Diagnostic Package #####
 # ======================================================================
-# Convective Transition Statistics
-#  See convecTransStats.py for detailed info
-os.system("python "+os.environ["VARCODE"]+"/"+"convecTransStats.py")
-#### THE FOLLOWING FUNCTIONALITIES HAVE NOT BEEN IMPLEMENTED YET!!!####
+# Convective Transition Basic Statistics
+#  See convecTransBasic.py for detailed info
+os.system("python "+os.environ["VARCODE"]+"/"+"convecTransBasic.py")
 ## ======================================================================
-## Convective Transition Thermodynamic Critical
-##  See convecTransThermoCritic.py for detailed info
-#os.system("python "+os.environ["VARCODE"]+"/"+"convecTransThermoCritic.py")
+## Convective Transition Critical Collapse
+##  Requires output from convecTransBasic.py
+##  See convecTransCriticalCollapse.py for detailed info
+os.system("python "+os.environ["VARCODE"]+"/"+"convecTransCriticalCollapse.py")
+
+##### THE FOLLOWING FUNCTIONALITIES HAVE NOT BEEN IMPLEMENTED YET!!!#####
 ## ======================================================================
 ## Moisture Precipitation Joint Probability Density Function
 ##  See cwvPrecipJPDF.py for detailed info
 #os.system("python "+os.environ["VARCODE"]+"/"+"cwvPrecipJPDF.py")
 ## ======================================================================
-## Moisture Precipitation Joint Probability Density Function
+## Super Critical Precipitation Probability
+##  Requires output from convecTransBasic.py
 ##  See supCriticPrecipProb.py for detailed info
 #os.system("python "+os.environ["VARCODE"]+"/"+"supCriticPrecipProb.py")
