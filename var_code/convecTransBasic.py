@@ -71,9 +71,9 @@ print("**************************************************")
 #  convecTransBasic_usp_calc.py
 #  & convecTransBasic_usp_plot.py
 
-print("Load user-specified binning parameters..."),
-
 # Create and read user-specified parameters
+
+print("Load user-specified binning parameters..."),
 os.system("python "+os.environ["VARCODE"]+"/"+"convecTransBasic_usp_calc.py")
 with open(os.environ["VARCODE"]+"/"+"convecTransBasic_calc_parameters.json") as outfile:
     bin_data=json.load(outfile)
@@ -91,7 +91,7 @@ print("...Loaded!")
 #  redoing binning computation every time
 # Check if binned data file exists in wkdir/casename/.../ from a previous computation
 #  if so, skip binning; otherwise, bin data using model output
-#  (see convecTransBasic_usp_calc.py for where the model output locate)
+#  (see convecTransBasic_usp_calc.py for where the model output is located)
 
 if (len(bin_data["bin_output_list"])==0 or bin_data["BIN_ANYWAY"]):
 
