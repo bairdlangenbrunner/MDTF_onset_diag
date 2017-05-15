@@ -62,7 +62,7 @@ from convecTransBasic_util import convecTransBasic_calc_model
 from convecTransBasic_util import convecTransBasic_loadAnalyzedData
 from convecTransBasic_util import convecTransBasic_plot
 print("**************************************************")
-print("Excuting Convective Transition Basic Statistics (convecTransBasic.py)......")
+print("Executing Convective Transition Basic Statistics (convecTransBasic.py)......")
 print("**************************************************")
 
 # ======================================================================
