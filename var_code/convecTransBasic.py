@@ -143,5 +143,5 @@ os.system("echo '<TR>' >> "+os.environ["WKDIR"]+"/MDTF_"+os.environ["CASENAME"]+
 print('...Created!')
 
 print("**************************************************")
-print("Convective Transition Basic Statistics (convecTransBasic.py) Excuted!")
+print("Convective Transition Basic Statistics (convecTransBasic.py) Executed!")
 print("**************************************************")
