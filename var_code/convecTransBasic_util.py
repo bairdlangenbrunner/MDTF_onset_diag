@@ -30,6 +30,8 @@ import networkx
 # ======================================================================
 # convecTransBasic_binTave
 #  takes arguments and bins by CWV & tave bins
+# Python module numba is required to compile this just-in-time
+#  see http://numba.pydata.org/
 
 @jit(nopython=True)
 def convecTransBasic_binTave(lon_idx, CWV_BIN_WIDTH, NUMBER_OF_REGIONS, NUMBER_TEMP_BIN, NUMBER_CWV_BIN, PRECIP_THRESHOLD, REGION, CWV, RAIN, temp, QSAT_INT, p0, p1, p2, pe, q0, q1):
